@@ -2,125 +2,195 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>YAiS 生态资产看板</title>
-    <!-- 引入 Ethers.js 库，用于连接 BNB 链 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YAiS 生态 - 恒通算力</title>
+    <!-- 引入 Ethers.js -->
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
     <style>
-        body { font-family: 'Arial', sans-serif; background-color: #f0f2f5; padding: 20px; text-align: center; }
-        .card { background: white; border-radius: 10px; padding: 20px; margin: 10px auto; max-width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .btn { background-color: #f0b90b; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 10px;}
-        .btn:hover { background-color: #d1a006; }
-        .balance { font-size: 24px; font-weight: bold; color: #333; margin: 10px 0; }
-        .label { color: #666; font-size: 14px; }
-        #walletAddress { word-break: break-all; color: #007bff; font-size: 12px; margin-bottom: 20px; }
+        /* 基础样式重置 */
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #0d1117; color: #ffffff; }
+        
+        /* 顶部导航 */
+        .header { padding: 20px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(90deg, #1a1f2e 0%, #0d1117 100%); border-bottom: 1px solid #30363d; }
+        .logo-area h1 { margin: 0; font-size: 24px; color: #a371f7; font-weight: 800; letter-spacing: 1px; }
+        .logo-area p { margin: 5px 0 0; font-size: 12px; color: #8b949e; }
+        .coin-icon { width: 50px; height: 50px; background: #f0b90b; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #000; box-shadow: 0 0 15px rgba(240, 185, 11, 0.4); }
+
+        /* 核心操作区 */
+        .main-container { padding: 20px; max-width: 600px; margin: 0 auto; }
+        
+        /* 连接钱包卡片 */
+        .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px; margin-bottom: 20px; text-align: center; }
+        .connect-btn { background: #238636; color: white; border: none; padding: 12px 0; width: 100%; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .connect-btn:active { transform: scale(0.98); opacity: 0.9; }
+        .connect-btn.connected { background: #1f6feb; }
+
+        /* 资产展示区 (默认隐藏) */
+        #asset-panel { display: none; }
+        .asset-row { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #30363d; }
+        .asset-row:last-child { border-bottom: none; }
+        .asset-name { font-size: 14px; color: #8b949e; }
+        .asset-value { font-size: 18px; font-weight: bold; color: #ffffff; }
+
+        /* 功能按钮区 */
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .action-btn { background: #1f6feb; color: white; border: none; padding: 15px; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; }
+        .action-btn.secondary { background: #30363d; }
+
+        /* 底部导航模拟 */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #0d1117; border-top: 1px solid #30363d; display: flex; justify-content: space-around; padding: 10px 0; padding-bottom: 20px; /*适配iPhone底部*/ }
+        .nav-item { text-align: center; color: #8b949e; font-size: 12px; }
+        .nav-item.active { color: #58a6ff; }
+        .nav-icon { font-size: 20px; display: block; margin-bottom: 4px; }
     </style>
 </head>
 <body>
 
-    <h2>💎 YAiS 生态资产看板</h2>
-    
-    <!-- 钱包连接状态 -->
-    <div id="status">请先连接钱包</div>
-    <button class="btn" onclick="connectWallet()">🦊 连接 MetaMask (BNB主网)</button>
+    <!-- 顶部 -->
+    <div class="header">
+        <div class="logo-area">
+            <h1>YAiS 生态</h1>
+            <p>恒通算力 · 价值闭环</p>
+        </div>
+        <div class="coin-icon">HT</div>
+    </div>
 
-    <!-- 资产展示区 -->
-    <div id="assets" style="display:none;">
-        <div class="card">
-            <div class="label">恒通稳定币 (HTB)</div>
-            <div class="balance" id="htbBalance">0.00</div>
+    <div class="main-container">
+        <!-- 连接区域 -->
+        <div class="card" id="wallet-card">
+            <p style="color:#8b949e; margin-bottom:15px;">连接钱包以管理您的资产</p>
+            <button class="connect-btn" id="connectBtn" onclick="connectWallet()">连接钱包</button>
+            <p id="wallet-address" style="margin-top:10px; font-size:12px; color:#58a6ff; word-break: break-all;"></p>
         </div>
-        <div class="card">
-            <div class="label">生态释放币 (YAiS)</div>
-            <div class="balance" id="yaisBalance">0.00</div>
+
+        <!-- 资产显示区域 (连接后显示) -->
+        <div class="card" id="asset-panel">
+            <h3 style="text-align:left; margin-top:0;">我的资产</h3>
+            <div class="asset-row">
+                <span class="asset-name">HTB (恒通稳定币)</span>
+                <span class="asset-value" id="balance-htb">Loading...</span>
+            </div>
+            <div class="asset-row">
+                <span class="asset-name">YAiS (生态释放币)</span>
+                <span class="asset-value" id="balance-yais">Loading...</span>
+            </div>
+            <div class="asset-row">
+                <span class="asset-name">QLB (算力币)</span>
+                <span class="asset-value" id="balance-qlb">Loading...</span>
+            </div>
         </div>
-        <div class="card">
-            <div class="label">算力积分 (QLB)</div>
-            <div class="balance" id="qlbBalance">0.00</div>
+
+        <!-- 功能按钮 -->
+        <div class="action-grid">
+            <button class="action-btn" onclick="simulateAction('HTB兑换')">HTB 兑换</button>
+            <button class="action-btn secondary" onclick="simulateAction('质押挖矿')">质押挖矿</button>
         </div>
     </div>
 
-<script>
-    // ==========================================
-    // 【配置中心】：以后换地址、换链只改这里！
-    // ==========================================
-    const CONFIG = {
-        chainId: 56, // BNB 主网 ID
-        tokens: {
-            HTB: {
-                name: "恒通稳定币",
-                address: "0xbb6fec528ffd252f6f22d6d05608599645144444", 
-                decimals: 18 // 如果精度不同请修改此处
-            },
-            YAiS: {
-                name: "生态释放币",
-                address: "0x3f431ffcda5ce875a45d462272a07ab1886d4444",
-                decimals: 18
-            },
-            QLB: {
-                name: "算力积分",
-                address: "0xea491e0077236b8b22d03cbd4372f28207b54444",
-                decimals: 18
+    <!-- 底部导航装饰 -->
+    <div class="bottom-nav">
+        <div class="nav-item active"><span class="nav-icon">🏠</span>首页</div>
+        <div class="nav-item"><span class="nav-icon">⚡</span>节点</div>
+        <div class="nav-item"><span class="nav-icon">🤖</span>AI应用</div>
+        <div class="nav-item"><span class="nav-icon">👤</span>我的</div>
+    </div>
+
+    <script>
+        // --- 配置区域 (你的合约地址) ---
+        const CONFIG = {
+            htb: "0xbb6fec528ffd252f6f22d6d05608599645144444",
+            yais: "0x3f431ffcda5ce875a45d462272a07ab1886d4444",
+            qlb: "0xea491e0077236b8b22d03cbd4372f28207b54444",
+            chainId: 56 // BNB Mainnet
+        };
+
+        // 标准的 ERC20 查询接口 (ABI)
+        const ERC20_ABI = [
+            "function balanceOf(address owner) view returns (uint256)",
+            "function decimals() view returns (uint8)",
+            "function symbol() view returns (string)"
+        ];
+
+        let provider, signer, userAddress;
+
+        // 1. 连接钱包逻辑 (兼容 TP钱包 和 MetaMask)
+        async function connectWallet() {
+            const btn = document.getElementById('connectBtn');
+            
+            // 检测环境
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    btn.innerText = "连接中...";
+                    
+                    // 请求连接
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    await provider.send("eth_requestAccounts", []);
+                    signer = provider.getSigner();
+                    userAddress = await signer.getAddress();
+
+                    // 检查网络 (简单检查，如果不是56则提示)
+                    const network = await provider.getNetwork();
+                    if (network.chainId !== 56) {
+                        alert("检测到您不在 BNB 主网！\n请切换网络后刷新页面。\n当前 ChainID: " + network.chainId);
+                        return; 
+                    }
+
+                    // 连接成功 UI 更新
+                    btn.innerText = "已连接";
+                    btn.classList.add('connected');
+                    document.getElementById('wallet-address').innerText = "地址: " + userAddress.substring(0,6) + "..." + userAddress.substring(38);
+                    document.getElementById('asset-panel').style.display = 'block';
+
+                    // 开始查询余额
+                    fetchBalances();
+
+                } catch (error) {
+                    console.error(error);
+                    btn.innerText = "连接失败 (重试)";
+                    alert("连接被取消或出错: " + error.message);
+                }
+            } else {
+                alert("未检测到钱包环境！\n请在 TP钱包 的 DApp 浏览器或 MetaMask 中打开此页面。");
             }
         }
-    };
 
-    let provider, signer, userAddress;
+        // 2. 查询余额逻辑
+        async function fetchBalances() {
+            if (!userAddress) return;
 
-    // 极简 ERC20 接口（用于读取余额）
-    const ERC20_ABI = [
-        "function balanceOf(address owner) view returns (uint256)",
-        "function decimals() view returns (uint8)"
-    ];
+            try {
+                // 查询 HTB
+                const contractHTB = new ethers.Contract(CONFIG.htb, ERC20_ABI, signer);
+                const balHTB = await contractHTB.balanceOf(userAddress);
+                const decHTB = await contractHTB.decimals();
+                document.getElementById('balance-htb').innerText = ethers.utils.formatUnits(balHTB, decHTB).substring(0, 8);
 
-    async function connectWallet() {
-        if (typeof window.ethereum === 'undefined') {
-            alert("请先安装 MetaMask 钱包！");
-            return;
+                // 查询 YAiS
+                const contractYAiS = new ethers.Contract(CONFIG.yais, ERC20_ABI, signer);
+                const balYAiS = await contractYAiS.balanceOf(userAddress);
+                const decYAiS = await contractYAiS.decimals();
+                document.getElementById('balance-yais').innerText = ethers.utils.formatUnits(balYAiS, decYAiS).substring(0, 8);
+
+                // 查询 QLB
+                const contractQLB = new ethers.Contract(CONFIG.qlb, ERC20_ABI, signer);
+                const balQLB = await contractQLB.balanceOf(userAddress);
+                const decQLB = await contractQLB.decimals();
+                document.getElementById('balance-qlb').innerText = ethers.utils.formatUnits(balQLB, decQLB).substring(0, 8);
+
+            } catch (err) {
+                console.error("查询余额出错:", err);
+                alert("余额查询失败，请确认合约地址是否正确或网络是否通畅。");
+            }
         }
 
-        try {
-            provider = new ethers.providers.Web3Provider(window.ethereum);
-            await provider.send("eth_requestAccounts", []);
-            signer = provider.getSigner();
-            userAddress = await signer.getAddress();
-
-            // 检查网络是否为 BNB 主网
-            const network = await provider.getNetwork();
-            if (network.chainId !== CONFIG.chainId) {
-                alert(`当前网络错误！请切换到 BNB Smart Chain (ID: ${CONFIG.chainId})`);
+        // 3. 模拟按钮点击反馈
+        function simulateAction(actionName) {
+            if (!userAddress) {
+                alert("请先连接钱包！");
                 return;
             }
-
-            document.getElementById('status').innerText = `已连接: ${userAddress.substring(0,6)}...${userAddress.substring(38)}`;
-            document.getElementById('assets').style.display = 'block';
-            
-            // 自动刷新余额
-            updateBalances();
-        } catch (error) {
-            console.error(error);
-            alert("连接失败，请查看控制台报错");
+            alert(`【系统提示】\n您点击了 "${actionName}" 功能。\n\n目前该功能的智能合约交互接口正在开发中，敬请期待！`);
         }
-    }
-
-    async function updateBalances() {
-        if (!userAddress) return;
-
-        // 循环读取三个代币的余额
-        for (const key in CONFIG.tokens) {
-            const token = CONFIG.tokens[key];
-            const contract = new ethers.Contract(token.address, ERC20_ABI, signer);
-            
-            try {
-                const rawBalance = await contract.balanceOf(userAddress);
-                // 将原始数值转换为人类可读的小数
-                const formattedBalance = ethers.utils.formatUnits(rawBalance, token.decimals);
-                document.getElementById(`${key.toLowerCase()}Balance`).innerText = parseFloat(formattedBalance).toFixed(4);
-            } catch (err) {
-                console.error(`读取 ${token.name} 失败:`, err);
-                document.getElementById(`${key.toLowerCase()}Balance`).innerText = "读取失败";
-            }
-        }
-    }
-</script>
+    </script>
 </body>
 </html>
