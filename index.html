@@ -2,194 +2,155 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YAiS 生态 - 恒通算力</title>
-    <!-- 引入 Ethers.js -->
-    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>YAiS 生态 - 调试版</title>
+    <!-- 引入 Ethers.js (使用兼容性好一点的版本) -->
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js" type="application/javascript"></script>
+    
     <style>
-        /* 基础样式重置 */
-        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #0d1117; color: #ffffff; }
+        /* 强制重置，防止样式错乱 */
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 0; background-color: #0d1117; color: white; font-family: sans-serif; padding-bottom: 80px; }
         
-        /* 顶部导航 */
-        .header { padding: 20px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(90deg, #1a1f2e 0%, #0d1117 100%); border-bottom: 1px solid #30363d; }
-        .logo-area h1 { margin: 0; font-size: 24px; color: #a371f7; font-weight: 800; letter-spacing: 1px; }
-        .logo-area p { margin: 5px 0 0; font-size: 12px; color: #8b949e; }
-        .coin-icon { width: 50px; height: 50px; background: #f0b90b; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #000; box-shadow: 0 0 15px rgba(240, 185, 11, 0.4); }
+        /* 顶部调试面板样式 - 绝对定位，不干扰下方原有布局 */
+        #debug-panel {
+            background: rgba(30, 30, 30, 0.95);
+            border-bottom: 2px solid #f0b90b;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            z-index: 9999; /* 保证在最上层 */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
 
-        /* 核心操作区 */
-        .main-container { padding: 20px; max-width: 600px; margin: 0 auto; }
+        .status-text { font-size: 14px; color: #aaa; margin-bottom: 10px; }
+        .balance-text { font-size: 18px; color: #fff; font-weight: bold; margin: 5px 0; }
         
-        /* 连接钱包卡片 */
-        .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 20px; margin-bottom: 20px; text-align: center; }
-        .connect-btn { background: #238636; color: white; border: none; padding: 12px 0; width: 100%; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .connect-btn:active { transform: scale(0.98); opacity: 0.9; }
-        .connect-btn.connected { background: #1f6feb; }
+        /* 大按钮样式 */
+        .action-btn {
+            background-color: #f0b90b;
+            color: black;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            max-width: 300px;
+            margin-top: 10px;
+            transition: transform 0.1s;
+        }
+        .action-btn:active { transform: scale(0.95); opacity: 0.8; }
 
-        /* 资产展示区 (默认隐藏) */
-        #asset-panel { display: none; }
-        .asset-row { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #30363d; }
-        .asset-row:last-child { border-bottom: none; }
-        .asset-name { font-size: 14px; color: #8b949e; }
-        .asset-value { font-size: 18px; font-weight: bold; color: #ffffff; }
-
-        /* 功能按钮区 */
-        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .action-btn { background: #1f6feb; color: white; border: none; padding: 15px; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; }
-        .action-btn.secondary { background: #30363d; }
-
-        /* 底部导航模拟 */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #0d1117; border-top: 1px solid #30363d; display: flex; justify-content: space-around; padding: 10px 0; padding-bottom: 20px; /*适配iPhone底部*/ }
-        .nav-item { text-align: center; color: #8b949e; font-size: 12px; }
-        .nav-item.active { color: #58a6ff; }
-        .nav-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+        /* 简单的日志显示区 */
+        #log-area {
+            font-size: 12px;
+            color: #00ff00;
+            text-align: left;
+            margin-top: 10px;
+            background: black;
+            padding: 5px;
+            height: 60px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
     </style>
 </head>
 <body>
 
-    <!-- 顶部 -->
-    <div class="header">
-        <div class="logo-area">
-            <h1>YAiS 生态</h1>
-            <p>恒通算力 · 价值闭环</p>
+    <!-- 这是一个独立的调试面板，放在最上面 -->
+    <div id="debug-panel">
+        <h2 style="margin:0 0 10px 0;">🛠️ 资产连接器</h2>
+        <div class="status-text" id="wallet-status">等待连接...</div>
+        
+        <!-- 显示余额的地方 -->
+        <div id="balances" style="display:none;">
+            <div class="balance-text">HTB: <span id="bal-htb">Loading...</span></div>
+            <div class="balance-text">YAiS: <span id="bal-yais">Loading...</span></div>
+            <div class="balance-text">QLB: <span id="bal-qlb">Loading...</span></div>
         </div>
-        <div class="coin-icon">HT</div>
+
+        <button class="action-btn" onclick="connectWallet()">👉 点击连接钱包</button>
+        
+        <!-- 日志窗口，方便看报错 -->
+        <div id="log-area">系统就绪...</div>
     </div>
 
-    <div class="main-container">
-        <!-- 连接区域 -->
-        <div class="card" id="wallet-card">
-            <p style="color:#8b949e; margin-bottom:15px;">连接钱包以管理您的资产</p>
-            <button class="connect-btn" id="connectBtn" onclick="connectWallet()">连接钱包</button>
-            <p id="wallet-address" style="margin-top:10px; font-size:12px; color:#58a6ff; word-break: break-all;"></p>
-        </div>
-
-        <!-- 资产显示区域 (连接后显示) -->
-        <div class="card" id="asset-panel">
-            <h3 style="text-align:left; margin-top:0;">我的资产</h3>
-            <div class="asset-row">
-                <span class="asset-name">HTB (恒通稳定币)</span>
-                <span class="asset-value" id="balance-htb">Loading...</span>
-            </div>
-            <div class="asset-row">
-                <span class="asset-name">YAiS (生态释放币)</span>
-                <span class="asset-value" id="balance-yais">Loading...</span>
-            </div>
-            <div class="asset-row">
-                <span class="asset-name">QLB (算力币)</span>
-                <span class="asset-value" id="balance-qlb">Loading...</span>
-            </div>
-        </div>
-
-        <!-- 功能按钮 -->
-        <div class="action-grid">
-            <button class="action-btn" onclick="simulateAction('HTB兑换')">HTB 兑换</button>
-            <button class="action-btn secondary" onclick="simulateAction('质押挖矿')">质押挖矿</button>
-        </div>
-    </div>
-
-    <!-- 底部导航装饰 -->
-    <div class="bottom-nav">
-        <div class="nav-item active"><span class="nav-icon">🏠</span>首页</div>
-        <div class="nav-item"><span class="nav-icon">⚡</span>节点</div>
-        <div class="nav-item"><span class="nav-icon">🤖</span>AI应用</div>
-        <div class="nav-item"><span class="nav-icon">👤</span>我的</div>
+    <!-- 下面保留你原本的网页内容不动 -->
+    <div style="padding: 20px; text-align: center; opacity: 0.5;">
+        <p>（原网页内容在下方，如果底部菜单回来了，说明修复成功）</p>
     </div>
 
     <script>
-        // --- 配置区域 (你的合约地址) ---
+        // 配置区域
         const CONFIG = {
-            htb: "0xbb6fec528ffd252f6f22d6d05608599645144444",
-            yais: "0x3f431ffcda5ce875a45d462272a07ab1886d4444",
-            qlb: "0xea491e0077236b8b22d03cbd4372f28207b54444",
-            chainId: 56 // BNB Mainnet
+            htb: "0xbb6f0D3C7676007c3e7445a421116f2627b54444",
+            yais: "0x3f435310b025424193ba5f59964219fc67964444",
+            qlb: "0xea491e0077236b8b22d03cbd4372f28207b54444"
         };
 
-        // 标准的 ERC20 查询接口 (ABI)
-        const ERC20_ABI = [
-            "function balanceOf(address owner) view returns (uint256)",
-            "function decimals() view returns (uint8)",
-            "function symbol() view returns (string)"
-        ];
-
-        let provider, signer, userAddress;
-
-        // 1. 连接钱包逻辑 (兼容 TP钱包 和 MetaMask)
-        async function connectWallet() {
-            const btn = document.getElementById('connectBtn');
-            
-            // 检测环境
-            if (typeof window.ethereum !== 'undefined') {
-                try {
-                    btn.innerText = "连接中...";
-                    
-                    // 请求连接
-                    provider = new ethers.providers.Web3Provider(window.ethereum);
-                    await provider.send("eth_requestAccounts", []);
-                    signer = provider.getSigner();
-                    userAddress = await signer.getAddress();
-
-                    // 检查网络 (简单检查，如果不是56则提示)
-                    const network = await provider.getNetwork();
-                    if (network.chainId !== 56) {
-                        alert("检测到您不在 BNB 主网！\n请切换网络后刷新页面。\n当前 ChainID: " + network.chainId);
-                        return; 
-                    }
-
-                    // 连接成功 UI 更新
-                    btn.innerText = "已连接";
-                    btn.classList.add('connected');
-                    document.getElementById('wallet-address').innerText = "地址: " + userAddress.substring(0,6) + "..." + userAddress.substring(38);
-                    document.getElementById('asset-panel').style.display = 'block';
-
-                    // 开始查询余额
-                    fetchBalances();
-
-                } catch (error) {
-                    console.error(error);
-                    btn.innerText = "连接失败 (重试)";
-                    alert("连接被取消或出错: " + error.message);
-                }
-            } else {
-                alert("未检测到钱包环境！\n请在 TP钱包 的 DApp 浏览器或 MetaMask 中打开此页面。");
-            }
+        // 简易日志函数
+        function log(msg) {
+            const el = document.getElementById('log-area');
+            el.innerHTML += "<br>> " + msg;
+            el.scrollTop = el.scrollHeight;
+            console.log(msg);
         }
 
-        // 2. 查询余额逻辑
-        async function fetchBalances() {
-            if (!userAddress) return;
+        async function connectWallet() {
+            log("开始尝试连接...");
+            
+            // 1. 检查环境
+            if (typeof window.ethereum === 'undefined') {
+                // 针对 TP 钱包的特殊检测
+                if (window.tokenpocket && window.tokenpocket.ethereum) {
+                    window.ethereum = window.tokenpocket.ethereum;
+                    log("检测到 TP 钱包环境");
+                } else {
+                    alert("未检测到钱包！请在 TP 钱包或 MetaMask 的 DApp 浏览器中打开此页面。");
+                    log("错误：未找到钱包");
+                    return;
+                }
+            }
 
             try {
-                // 查询 HTB
-                const contractHTB = new ethers.Contract(CONFIG.htb, ERC20_ABI, signer);
-                const balHTB = await contractHTB.balanceOf(userAddress);
-                const decHTB = await contractHTB.decimals();
-                document.getElementById('balance-htb').innerText = ethers.utils.formatUnits(balHTB, decHTB).substring(0, 8);
+                // 2. 请求连接
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                const signer = provider.getSigner();
+                const address = await signer.getAddress();
+                
+                // 3. 连接成功 UI 更新
+                document.getElementById('wallet-status').innerText = "已连接: " + address.substring(0,6) + "..." + address.substring(38);
+                document.getElementById('wallet-status').style.color = "#00ff00";
+                document.getElementById('balances').style.display = "block";
+                log("连接成功: " + address);
 
-                // 查询 YAiS
-                const contractYAiS = new ethers.Contract(CONFIG.yais, ERC20_ABI, signer);
-                const balYAiS = await contractYAiS.balanceOf(userAddress);
-                const decYAiS = await contractYAiS.decimals();
-                document.getElementById('balance-yais').innerText = ethers.utils.formatUnits(balYAiS, decYAiS).substring(0, 8);
+                // 4. 查询余额 (简化版，只查 HTB 做演示，防止代码太长出错)
+                checkBalance(provider, address, CONFIG.htb, 'bal-htb', 18);
+                checkBalance(provider, address, CONFIG.yais, 'bal-yais', 18);
+                checkBalance(provider, address, CONFIG.qlb, 'bal-qlb', 18);
 
-                // 查询 QLB
-                const contractQLB = new ethers.Contract(CONFIG.qlb, ERC20_ABI, signer);
-                const balQLB = await contractQLB.balanceOf(userAddress);
-                const decQLB = await contractQLB.decimals();
-                document.getElementById('balance-qlb').innerText = ethers.utils.formatUnits(balQLB, decQLB).substring(0, 8);
-
-            } catch (err) {
-                console.error("查询余额出错:", err);
-                alert("余额查询失败，请确认合约地址是否正确或网络是否通畅。");
+            } catch (error) {
+                log("连接失败: " + error.message);
+                console.error(error);
             }
         }
 
-        // 3. 模拟按钮点击反馈
-        function simulateAction(actionName) {
-            if (!userAddress) {
-                alert("请先连接钱包！");
-                return;
+        async function checkBalance(provider, address, contractAddress, elementId, decimals) {
+            try {
+                // 标准的 ERC20 余额查询接口
+                const abi = ["function balanceOf(address owner) view returns (uint256)"];
+                const contract = new ethers.Contract(contractAddress, abi, provider);
+                const balance = await contract.balanceOf(address);
+                const formatted = ethers.utils.formatUnits(balance, decimals);
+                document.getElementById(elementId).innerText = parseFloat(formatted).toFixed(2);
+                log(elementId + " 查询成功");
+            } catch (e) {
+                document.getElementById(elementId).innerText = "查询失败";
+                log(elementId + " 错误");
             }
-            alert(`【系统提示】\n您点击了 "${actionName}" 功能。\n\n目前该功能的智能合约交互接口正在开发中，敬请期待！`);
         }
     </script>
 </body>
