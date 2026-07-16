@@ -221,6 +221,170 @@
             <div style="font-size:20px;">👤</div><div style="font-size:10px;">我的</div>
         </a>
     </div>
+<!-- ================= 新增：节点购买与收益计算器 ================= -->
+<style>
+    /* 这是一个独立的区域，专门用来做计算 */
+    #calculator-section {
+        margin: 20px;
+        padding: 25px;
+        background: linear-gradient(145deg, #1a1a1a, #222); /* 深色背景 */
+        border-radius: 16px;
+        border: 1px solid #333;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        color: white;
+        font-family: sans-serif;
+    }
 
+    #calculator-section h3 {
+        margin-top: 0;
+        color: #f0b90b; /* 金色标题 */
+        font-size: 18px;
+        border-bottom: 1px solid #333;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+
+    .input-group {
+        margin-bottom: 20px;
+    }
+
+    .input-group label {
+        display: block;
+        font-size: 12px;
+        color: #888;
+        margin-bottom: 8px;
+    }
+
+    .input-group input {
+        width: 100%;
+        padding: 15px;
+        background: #0d0d0d;
+        border: 1px solid #444;
+        color: #fff;
+        border-radius: 8px;
+        font-size: 16px;
+        box-sizing: border-box; /* 防止输入框撑破容器 */
+    }
+
+    .result-box {
+        background: rgba(240, 185, 11, 0.1); /* 淡淡的金色背景 */
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #f0b90b;
+    }
+
+    .result-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    .result-row:last-child {
+        margin-bottom: 0;
+        font-weight: bold;
+        font-size: 16px;
+        color: #f0b90b;
+    }
+
+    .buy-btn {
+        width: 100%;
+        padding: 15px;
+        background: #f0b90b;
+        color: #000;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 16px;
+        margin-top: 20px;
+        cursor: pointer;
+    }
+    
+    .buy-btn:active {
+        opacity: 0.8;
+    }
+</style>
+
+<div id="calculator-section">
+    <h3>🚀 部署新节点 (模拟器)</h3>
+    
+    <!-- 输入框 -->
+    <div class="input-group">
+        <label>投入 HTB 数量 (1 HTB = 1 节点)</label>
+        <input type="number" id="nodeInput" placeholder="请输入数量，例如：1000" oninput="calculateYAiS()">
+    </div>
+
+    <!-- 结果显示区 -->
+    <div class="result-box">
+        <div class="result-row">
+            <span>当前档位倍率：</span>
+            <span id="rateDisplay">1.0 倍 (未达标)</span>
+        </div>
+        <div class="result-row">
+            <span>预计每日释放 YAiS：</span>
+            <span id="dailyYAiS">0.00</span>
+        </div>
+        <div class="result-row">
+            <span>预计回本周期：</span>
+            <span id="roiDays">-- 天</span>
+        </div>
+    </div>
+
+    <button class="buy-btn" onclick="alert('请先连接钱包充值 HTB！')">立即部署节点</button>
+</div>
+
+<!-- 核心计算逻辑脚本 -->
+<script>
+    function calculateYAiS() {
+        // 1. 获取用户输入的数量
+        let count = document.getElementById('nodeInput').value;
+        count = parseFloat(count);
+
+        // 如果没输入或小于0，重置显示
+        if (!count || count <= 0) {
+            document.getElementById('rateDisplay').innerText = "1.0 倍 (未达标)";
+            document.getElementById('dailyYAiS').innerText = "0.00";
+            document.getElementById('roiDays').innerText = "-- 天";
+            return;
+        }
+
+        // 2. 判断倍率 (根据你的文档逻辑)
+        let multiplier = 1.0; // 默认
+        let tierText = "1.0 倍 (基础档)";
+
+        if (count >= 100 && count < 1000) {
+            multiplier = 1.6;
+            tierText = "1.6 倍 (青铜档)";
+        } else if (count >= 1000 && count < 3000) {
+            multiplier = 2.0;
+            tierText = "2.0 倍 (黄金档)";
+        } else if (count >= 3000) {
+            multiplier = 3.0;
+            tierText = "3.0 倍 (钻石档)";
+        }
+
+        // 3. 计算每日产出 YAiS
+        // 公式：节点数 * 0.005 (千分之五) * 倍率
+        let dailyOutput = count * 0.005 * multiplier;
+
+        // 4. 计算回本周期 (粗略估算：假设YAiS价格不变)
+        // 成本是 count (HTB)，每天赚 dailyOutput (YAiS)
+        // 这里为了演示，我们假设 1 YAiS = 0.1 HTB (按初始价)
+        // 每天价值 = dailyOutput * 0.1
+        let dailyValue = dailyOutput * 0.1; 
+        let daysToRecover = count / dailyValue;
+
+        // 5. 更新页面显示
+        document.getElementById('rateDisplay').innerText = tierText;
+        document.getElementById('dailyYAiS').innerText = dailyOutput.toFixed(2);
+        
+        if(dailyValue > 0) {
+             document.getElementById('roiDays').innerText = Math.ceil(daysToRecover) + " 天";
+        } else {
+             document.getElementById('roiDays').innerText = "-- 天";
+        }
+    }
+</script>
+<!-- ================= 结束 ================= -->
 </body>
 </html>
