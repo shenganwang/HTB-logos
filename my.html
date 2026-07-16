@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的资产 - YAiS生态</title>
+    <style>
+        /* === 全局样式 === */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0d0d0d;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding-bottom: 80px; /* 给底部导航留位置 */
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        /* === 资产卡片区域 === */
+        .asset-card {
+            background: linear-gradient(145deg, #1a1a1a, #222);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .asset-info h3 {
+            margin: 0 0 5px 0;
+            font-size: 16px;
+            color: #aaa;
+        }
+
+        .asset-balance {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .asset-actions button {
+            background: #333;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-left: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .asset-actions button.primary {
+            background: #f0b90b;
+            color: #000;
+            border: none;
+            font-weight: bold;
+        }
+
+        /* === 菜单列表 === */
+        .menu-list {
+            margin-top: 30px;
+        }
+
+        .menu-item {
+            background: #161616;
+            padding: 15px 20px;
+            border-bottom: 1px solid #222;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .menu-item:first-child { border-top-left-radius: 12px; border-top-right-radius: 12px; }
+        .menu-item:last-child { border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; border-bottom: none; }
+
+        .menu-item:active { background: #222; }
+
+        /* === 底部导航栏 (保持与首页一致) === */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: #111;
+            border-top: 1px solid #222;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .nav-item {
+            text-align: center;
+            color: #666;
+            text-decoration: none;
+            font-size: 10px;
+            flex: 1;
+        }
+
+        .nav-item.active { color: #f0b90b; }
+        .nav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>我的资产中心</h2>
+
+        <!-- 1. HTB 算力币 (基础层) -->
+        <div class="asset-card">
+            <div class="asset-info">
+                <h3>HTB (算力储备)</h3>
+                <div class="asset-balance" id="balance-htb">0.00</div>
+            </div>
+            <div class="asset-actions">
+                <button onclick="alert('充值通道维护中')">充值</button>
+                <button class="primary" onclick="alert('请先绑定钱包')">提现</button>
+            </div>
+        </div>
+
+        <!-- 2. YAiS 核心权益币 (价值层) -->
+        <div class="asset-card" style="border-color: #f0b90b;">
+            <div class="asset-info">
+                <h3 style="color:#f0b90b">YAiS (核心权益)</h3>
+                <div class="asset-balance" id="balance-yais">0.00</div>
+            </div>
+            <div class="asset-actions">
+                <button onclick="alert('兑换功能开发中')">兑HTB</button>
+                <button class="primary" onclick="window.location.href='ai-app.html'">进应用</button>
+            </div>
+        </div>
+
+        <!-- 3. QLB 消费积分 (应用层) -->
+        <div class="asset-card">
+            <div class="asset-info">
+                <h3>QLB (消费积分)</h3>
+                <div class="asset-balance" id="balance-qlb">0.00</div>
+            </div>
+            <div class="asset-actions">
+                <button onclick="alert('暂无可质押项')">质押</button>
+                <button class="primary" onclick="window.location.href='ai-app.html'">去消费</button>
+            </div>
+        </div>
+
+        <!-- 常用功能菜单 -->
+        <div class="menu-list">
+            <div class="menu-item" onclick="alert('邀请好友功能即将上线')">
+                <span>🤝 邀请好友</span>
+                <span style="color:#666">></span>
+            </div>
+            <div class="menu-item" onclick="alert('节点管理请前往“节点”页面')">
+                <span>⚙️ 我的节点</span>
+                <span style="color:#666">></span>
+            </div>
+            <div class="menu-item" onclick="alert('设置功能开发中')">
+                <span>🔒 安全设置</span>
+                <span style="color:#666">></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航栏 -->
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <span class="nav-icon">🏠</span>首页
+        </a>
+        <a href="node.html" class="nav-item">
+            <span class="nav-icon">⚡</span>节点
+        </a>
+        <a href="ai-app.html" class="nav-item">
+            <span class="nav-icon">🤖</span>AI应用
+        </a>
+        <a href="my.html" class="nav-item active">
+            <span class="nav-icon">👤</span>我的
+        </a>
+    </div>
+
+    <script>
+        // 模拟从本地存储读取数据 (后续对接真实接口)
+        // 这里只是为了演示效果，随便给了点初始值
+        const userData = {
+            htb: localStorage.getItem('user_htb') || 12450.00,
+            yais: localStorage.getItem('user_yais') || 35.20,
+            qlb: localStorage.getItem('user_qlb') || 892
+        };
+
+        // 更新页面显示
+        document.getElementById('balance-htb').innerText = parseFloat(userData.htb).toFixed(2);
+        document.getElementById('balance-yais').innerText = parseFloat(userData.yais).toFixed(2);
+        document.getElementById('balance-qlb').innerText = parseFloat(userData.qlb).toFixed(0);
+    </script>
+</body>
+</html>
