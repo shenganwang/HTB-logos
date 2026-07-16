@@ -499,5 +499,45 @@
     });
 </script>
 <!-- === 通用底部导航栏 (结束) === -->
+    <!-- === 节点页面核心内容区域 (开始) === -->
+<div class="page-content" style="padding: 20px; padding-bottom: 80px;">
+    
+    <!-- 1. 顶部标题 -->
+    <h2 style="color: #fff; text-align: center; margin-bottom: 30px;">算力节点中心</h2>
+
+    <!-- 2. 当前状态卡片 -->
+    <div style="background: #2a2a2a; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
+        <p style="color: #aaa; font-size: 14px; margin: 0;">我的可用余额 (HTB)</p>
+        <!-- 这里就是显示余额的地方 -->
+        <h1 id="user-balance" style="color: #4caf50; margin: 10px 0; font-size: 32px;">0.00</h1>
+    </div>
+
+    <div style="background: #2a2a2a; padding: 20px; border-radius: 12px; margin-bottom: 30px; text-align: center;">
+        <p style="color: #aaa; font-size: 14px; margin: 0;">当前持有节点数</p>
+        <!-- 这里就是显示节点数的地方 -->
+        <h1 id="current-nodes" style="color: #2196f3; margin: 10px 0; font-size: 32px;">0</h1>
+        <p style="color: #888; font-size: 12px;">每个节点每日产出 0.01 YAIS</p>
+    </div>
+
+    <!-- 3. 购买交互区 -->
+    <div style="text-align: center;">
+        <p style="color: #fff; margin-bottom: 10px;">单价：100 HTB / 个</p>
+        <!-- 这里是购买按钮 -->
+        <button onclick="buyNode()" style="
+            background: linear-gradient(90deg, #ff9800, #ff5722); 
+            border: none; 
+            color: white; 
+            padding: 15px 40px; 
+            border-radius: 30px; 
+            font-size: 18px; 
+            font-weight: bold; 
+            width: 100%; 
+            box-shadow: 0 4px 15px rgba(255, 87, 34, 0.4);">
+            立即购买节点
+        </button>
+    </div>
+
+</div>
+<!-- === 节点页面核心内容区域 (结束) === -->
 </body>
 </html>
