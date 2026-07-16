@@ -105,36 +105,69 @@
 
     <!-- 5. 【核心逻辑】JavaScript 脚本 -->
     <script>
-        // 监听输入框的变化
-        document.getElementById('nodeInput').addEventListener('input', function(e) {
-            var count = parseInt(e.target.value); // 获取输入的数量
-            var resultBox = document.getElementById('calcResult');
-            var rateText = document.getElementById('showRate');
-            var yaisText = document.getElementById('showYais');
+    // === 1. 定义与首页一致的默认数据结构 (防止第一次打开报错) ===
+    let userData = {
+        htb: 1000.00,
+        yais: 200.00,
+        qlb: 50.00,
+        nodes: 1000,
+        multiplier: 2.0
+    };
 
-            if (count > 0) {
-                resultBox.style.display = 'block'; // 显示结果区域
-                
-                var rate = 1; // 默认倍率
-                // --- 这里是我们刚才定的逻辑 ---
-                if (count >= 100 && count <= 999) {
-                    rate = 1.6;
-                } else if (count >= 1000 && count <= 2999) {
-                    rate = 2.0;
-                } else if (count >= 3000) {
-                    rate = 3.0;
-                }
-                
-                // 计算公式：数量 * 0.005 * 倍率
-                var dailyYais = (count * 0.005 * rate).toFixed(2); 
+    // === 2. 初始化：从 LocalStorage 读取最新数据 ===
+    function initNodePage() {
+        const savedData = localStorage.getItem('yais_user_data');
+        if (savedData) {
+            // 如果有存档，就加载存档
+            userData = JSON.parse(savedData);
+        } else {
+            // 如果没存档（第一次来），就保存一份初始数据
+            saveData(); 
+        }
+        
+        updateUI(); // 刷新界面数字
+    }
 
-                rateText.innerText = rate + " 倍";
-                yaisText.innerText = dailyYais + " YAiS";
-            } else {
-                resultBox.style.display = 'none'; // 如果没输入或为0，隐藏结果
-            }
-        });
-    </script>
+    // === 3. 保存数据到“公共账本” ===
+    function saveData() {
+        localStorage.setItem('yais_user_data', JSON.stringify(userData));
+    }
+
+    // === 4. 更新界面显示 ===
+    function updateUI() {
+        // 更新显示的节点数量
+        const nodeCountEl = document.getElementById('current-nodes');
+        if(nodeCountEl) nodeCountEl.innerText = userData.nodes;
+
+        // 更新显示的余额 (让用户知道买不买得起)
+        const balanceEl = document.getElementById('user-balance');
+        if(balanceEl) balanceEl.innerText = userData.htb.toFixed(2);
+    }
+
+    // === 5. 核心功能：购买节点逻辑 ===
+    function buyNodes(amount, cost) {
+        // 检查余额是否足够
+        if (userData.htb >= cost) {
+            // 扣钱
+            userData.htb -= cost;
+            // 加节点
+            userData.nodes += amount;
+            
+            // 保存新数据
+            saveData();
+            // 刷新界面
+            updateUI();
+            
+            alert(`成功！\n消耗: ${cost} HTB\n获得: ${amount} 节点\n当前节点总数: ${userData.nodes}`);
+        } else {
+            alert("余额不足！请去首页充值或兑换。");
+        }
+    }
+
+    // 页面加载完成后立即执行
+    window.onload = initNodePage;
+
+</script>
 </body>
     <!-- 顶部状态 -->
     <div class="header">
