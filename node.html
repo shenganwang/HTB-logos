@@ -419,6 +419,50 @@
     }
 </script>
 <!-- ================= 结束 ================= -->
+        <!-- === 节点页面核心内容 (开始) === -->
+    <div style="padding: 20px; padding-bottom: 80px; color: #fff;">
+        
+        <!-- 1. 顶部标题 -->
+        <h2 style="text-align: center; margin-bottom: 30px; font-size: 24px;">⚡ 算力节点中心</h2>
+
+        <!-- 2. 余额展示卡片 -->
+        <div style="background: #2a2a2a; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+            <p style="color: #aaa; margin: 0; font-size: 14px;">当前可用余额 (HTB)</p>
+            <!-- 【关键点】这里就是显示余额的地方，ID必须对应 -->
+            <h1 id="user-balance" style="color: #4caf50; margin: 10px 0; font-size: 36px; font-weight: bold;">0.00</h1>
+        </div>
+
+        <!-- 3. 节点状态展示 -->
+        <div style="background: #2a2a2a; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 30px; border: 1px solid #444;">
+            <p style="color: #aaa; margin: 0; font-size: 14px;">当前持有节点数</p>
+            <!-- 【关键点】这里就是显示节点数的地方 -->
+            <h1 id="current-nodes" style="color: #fff; margin: 10px 0; font-size: 36px; font-weight: bold;">0</h1>
+            <p style="color: #888; font-size: 12px;">运行中 - 每日自动释放收益</p>
+        </div>
+
+        <!-- 4. 购买/升级操作区 -->
+        <div style="text-align: center;">
+            <p style="margin-bottom: 15px; color: #ccc;">单个节点价格：<span style="color: #ff9800; font-weight: bold;">100 HTB</span></p>
+            
+            <!-- 【关键点】这是购买按钮，ID必须对应 -->
+            <button id="buy-node-btn" style="
+                background: linear-gradient(90deg, #007bff, #00d4ff); 
+                border: none; 
+                padding: 15px 40px; 
+                border-radius: 30px; 
+                color: white; 
+                font-size: 18px; 
+                font-weight: bold; 
+                width: 100%; 
+                cursor: pointer;
+                box-shadow: 0 4px 15px rgba(0, 123, 255, 0.4);
+                transition: transform 0.1s;">
+                立即购买节点 (+1)
+            </button>
+        </div>
+
+    </div>
+    <!-- === 节点页面核心内容 (结束) === -->
     <!-- === 通用底部导航栏 (开始) === -->
 <nav class="bottom-nav">
     <!-- 首页按钮 -->
