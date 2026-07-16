@@ -523,119 +523,72 @@
 </style>
 
 <script>
-    // === 1. 初始化页面数据 (页面加载时立即执行) ===
+    // === 1. 页面加载完成后执行 ===
     document.addEventListener('DOMContentLoaded', function() {
-        loadNodePageData(); 
+        console.log("节点页面已加载，正在初始化...");
+        
+        // 初始化时先读取一次数据
+        updatePageDisplay();
+        
+        // 给购买按钮绑定点击事件
+        const buyBtn = document.getElementById('buy-node-btn');
+        if(buyBtn) {
+            buyBtn.addEventListener('click', handleBuyNode);
+        } else {
+            console.error("错误：找不到购买按钮！请检查ID是否为 buy-node-btn");
+        }
     });
 
-    // === 2. 核心函数：加载节点页数据 ===
-    async function loadNodePageData() {
-        const balanceEl = document.getElementById('user-balance');
-        const nodesEl = document.getElementById('current-nodes');
-        const buyBtn = document.getElementById('buy-node-btn');
+    // === 2. 核心功能：处理购买点击 ===
+    function handleBuyNode() {
+        console.log("用户点击了购买按钮");
 
-        // 防止元素没找到报错
-        if (!balanceEl || !nodesEl) return;
+        // A. 获取当前最新的数据 (从 localStorage 读取)
+        let currentBalance = parseFloat(localStorage.getItem('userBalance')) || 0;
+        let currentNodes = parseInt(localStorage.getItem('userNodes')) || 0;
+        
+        // 设定节点价格 (比如 100 HTB)
+        const NODE_PRICE = 100; 
 
-        try {
-            // A. 获取用户信息 (余额)
-            // 假设你的 auth.js 或 main.js 里有 getUserInfo 函数
-            // 如果没有，这里会尝试从 localStorage 读取缓存
-            let userInfo = null;
-            if (typeof window.getUserInfo === 'function') {
-                userInfo = await window.getUserInfo();
-            } 
+        // B. 判断余额是否充足
+        if (currentBalance < NODE_PRICE) {
+            // 【关键点】这里就是你要的提示！
+            alert(`余额不足！\n\n当前余额: ${currentBalance} HTB\n节点价格: ${NODE_PRICE} HTB\n\n请先去充值再试。`);
+            return; // 停止执行，不买
+        }
+
+        // C. 执行购买 (扣钱，加节点)
+        if (confirm(`确定要花费 ${NODE_PRICE} HTB 购买一个节点吗？`)) {
+            // 更新数据
+            currentBalance -= NODE_PRICE;
+            currentNodes += 1;
+
+            // 保存回本地存储
+            localStorage.setItem('userBalance', currentBalance.toFixed(2));
+            localStorage.setItem('userNodes', currentNodes);
+
+            // 刷新页面显示
+            updatePageDisplay();
             
-            // 如果获取到了数据，更新界面
-            if (userInfo && userInfo.balance !== undefined) {
-                // 保留两位小数显示
-                balanceEl.innerText = parseFloat(userInfo.balance).toFixed(2);
-                
-                // 顺便把余额存一下，方便后面购买时使用
-                localStorage.setItem('currentBalance', userInfo.balance);
-            } else {
-                // 如果还没登录或获取失败，显示 0.00
-                balanceEl.innerText = "0.00";
-            }
-
-            // B. 获取当前节点数
-            // 这里模拟从服务器获取，实际项目中你可能需要调用 API
-            // 暂时先设为 0，或者你可以去数据库查一下
-            // 这里的逻辑是：如果有缓存就读缓存，没有就是 0
-            let currentNodeCount = localStorage.getItem('myNodeCount') || 0;
-            nodesEl.innerText = currentNodeCount;
-
-        } catch (error) {
-            console.error("加载节点数据失败:", error);
-            balanceEl.innerText = "Error";
+            alert("购买成功！您的算力已提升。");
         }
     }
 
-    // === 3. 处理“购买节点”按钮点击事件 ===
-    const buyBtn = document.getElementById('buy-node-btn');
-    
-    if (buyBtn) {
-        buyBtn.addEventListener('click', async function() {
-            // A. 获取当前余额
-            // 优先从变量取，取不到去 localStorage 取，再取不到就是 0
-            let currentBalance = parseFloat(localStorage.getItem('currentBalance')) || 0;
-            
-            // 假设一个节点的价格 (你可以根据需要修改这个价格)
-            const NODE_PRICE = 100.00; 
+    // === 3. 辅助功能：更新页面显示的数字 ===
+    function updatePageDisplay() {
+        // 从本地存储读取数据，如果没有就默认为 0
+        const balance = parseFloat(localStorage.getItem('userBalance')) || 0;
+        const nodes = parseInt(localStorage.getItem('userNodes')) || 0;
 
-            // B. 检查余额够不够
-            if (currentBalance < NODE_PRICE) {
-                alert(`余额不足！\n当前余额: ${currentBalance} HTB\n需要: ${NODE_PRICE} HTB\n请先去充值。`);
-                return; // 余额不够，直接结束，不往下执行
-            }
+        // 找到页面上的元素
+        const balanceEl = document.getElementById('user-balance');
+        const nodesEl = document.getElementById('current-nodes');
 
-            // C. 二次确认
-            if (!confirm(`确定要花费 ${NODE_PRICE} HTB 购买一个算力节点吗？`)) {
-                return; // 用户点了取消
-            }
-
-            // D. 执行购买逻辑 (扣款 + 增加节点)
-            try {
-                // 1. 改变按钮状态，防止重复点击
-                buyBtn.innerText = "处理中...";
-                buyBtn.disabled = true;
-                buyBtn.style.opacity = "0.5";
-
-                // 2. 模拟扣款请求 (这里需要调用你的后端 API)
-                // 实际代码示例：
-                // const res = await fetch('/api/buy-node', { method: 'POST' ... });
-                
-                // --- 模拟成功 (演示用) ---
-                setTimeout(() => {
-                    // 扣除余额
-                    let newBalance = currentBalance - NODE_PRICE;
-                    localStorage.setItem('currentBalance', newBalance);
-                    
-                    // 增加节点数
-                    let oldNodes = parseInt(localStorage.getItem('myNodeCount') || 0);
-                    let newNodes = oldNodes + 1;
-                    localStorage.setItem('myNodeCount', newNodes);
-
-                    // 3. 更新界面显示
-                    document.getElementById('user-balance').innerText = newBalance.toFixed(2);
-                    document.getElementById('current-nodes').innerText = newNodes;
-
-                    // 4. 恢复按钮
-                    buyBtn.innerText = "购买节点";
-                    buyBtn.disabled = false;
-                    buyBtn.style.opacity = "1";
-
-                    alert("购买成功！您的算力已提升。");
-                }, 1000); 
-                // -------------------------
-
-            } catch (err) {
-                console.error(err);
-                alert("购买失败，请重试");
-                buyBtn.innerText = "购买节点";
-                buyBtn.disabled = false;
-            }
-        });
+        // 更新文字
+        if(balanceEl) balanceEl.innerText = balance.toFixed(2);
+        if(nodesEl) nodesEl.innerText = nodes;
+        
+        console.log(`当前状态 -> 余额: ${balance}, 节点: ${nodes}`);
     }
 </script>
         <!-- === 节点页面核心内容 (开始) === -->
