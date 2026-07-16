@@ -774,5 +774,115 @@
         document.body.insertAdjacentHTML('beforeend', modalHtml);
     }
 </script>
+    <!-- === 核心逻辑脚本 (开始) === -->
+<script>
+    // 1. 初始化变量
+    let currentBalance = 0; // 当前余额
+    const nodePrice = 35.2; // 节点价格
+
+    // 获取页面上的元素
+    const balanceEl = document.getElementById('user-balance');
+    const buyBtn = document.getElementById('buy-btn');
+    const modal = document.getElementById('modal-overlay');
+
+    // 页面加载时显示初始余额
+    updateBalanceDisplay(0);
+
+    // 2. 模拟充值功能 (点击余额数字触发)
+    function addTestMoney() {
+        // 每次点击增加 100 HTB
+        const oldBalance = currentBalance;
+        currentBalance += 100;
+        
+        // 播放数字滚动动画
+        animateValue(balanceEl, oldBalance, currentBalance, 800);
+    }
+
+    // 3. 数字滚动动画函数 (让数字像老虎机一样跳)
+    function animateValue(obj, start, end, duration) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            
+            // 计算当前应该显示的数值
+            const currentVal = progress * (end - start) + start;
+            obj.innerHTML = currentVal.toFixed(2); // 保留两位小数
+            
+            // 添加闪烁特效类
+            obj.classList.add('balance-flash');
+
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            } else {
+                // 动画结束，移除特效类
+                setTimeout(() => obj.classList.remove('balance-flash'), 200);
+            }
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    // 4. 更新余额显示的辅助函数
+    function updateBalanceDisplay(val) {
+        balanceEl.innerHTML = val.toFixed(2);
+    }
+
+    // 5. 购买按钮逻辑
+    if (buyBtn) {
+        buyBtn.addEventListener('click', function() {
+            // A. 按钮按压特效
+            this.classList.add('btn-buy-active');
+            setTimeout(() => this.classList.remove('btn-buy-active'), 150);
+
+            // B. 检查余额是否足够
+            if (currentBalance >= nodePrice) {
+                // 扣款逻辑
+                const oldBalance = currentBalance;
+                currentBalance -= nodePrice;
+                
+                // 执行扣款动画
+                animateValue(balanceEl, oldBalance, currentBalance, 500);
+                
+                // 显示成功弹窗
+                showModal('success');
+            } else {
+                // 余额不足，显示警告弹窗
+                showModal('error');
+            }
+        });
+    }
+
+    // 6. 弹窗控制逻辑
+    function showModal(type) {
+        const title = document.getElementById('modal-title');
+        const msg = document.getElementById('modal-msg');
+        const icon = document.getElementById('modal-icon');
+
+        if (type === 'success') {
+            title.innerText = "购买成功！";
+            msg.innerText = "您的算力节点已开始运行，预计每日产出 35.2 HTB。";
+            title.style.color = "#4caf50"; // 绿色
+            icon.innerText = "🎉";
+        } else {
+            title.innerText = "余额不足";
+            msg.innerText = "当前余额不足以支付该节点费用，请点击顶部余额进行充值测试。";
+            title.style.color = "#ff5252"; // 红色
+            icon.innerText = "⚠️";
+        }
+
+        // 显示遮罩层
+        modal.style.display = 'flex';
+    }
+
+    // 点击遮罩层关闭弹窗
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+            }
+        });
+    }
+</script>
+<!-- === 核心逻辑脚本 (结束) === -->
 </body>
 </html>
