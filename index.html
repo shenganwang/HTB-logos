@@ -3,320 +3,225 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>YAiS 生态 - 调试版</title>
-    <!-- 引入 Ethers.js (使用兼容性好一点的版本) -->
-    <script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js" type="application/javascript"></script>
-    
+    <title>YAiS 生态 - 恒通</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 FontAwesome 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* 强制重置，防止样式错乱 */
-        * { box-sizing: border-box; }
-        body { margin: 0; padding: 0; background-color: #0d1117; color: white; font-family: sans-serif; padding-bottom: 80px; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #0f172a; color: #e2e8f0; padding-bottom: 90px; overflow-x: hidden; }
         
-        /* 顶部调试面板样式 - 绝对定位，不干扰下方原有布局 */
-        #debug-panel {
-            background: rgba(30, 30, 30, 0.95);
-            border-bottom: 2px solid #f0b90b;
-            padding: 20px;
-            text-align: center;
-            position: relative;
-            z-index: 9999; /* 保证在最上层 */
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        /* 隐藏滚动条但保留功能 */
+        ::-webkit-scrollbar { display: none; }
+        
+        .glass-card { 
+            background: rgba(30, 41, 59, 0.7); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         }
 
-        .status-text { font-size: 14px; color: #aaa; margin-bottom: 10px; }
-        .balance-text { font-size: 18px; color: #fff; font-weight: bold; margin: 5px 0; }
+        /* 底部导航栏样式 */
+        .nav-bar {
+            position: fixed; bottom: 0; width: 100%; height: 80px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 100; padding-bottom: 15px; /* 适配 iPhone 底部横条 */
+        }
+        .nav-item { text-align: center; color: #64748b; font-size: 12px; transition: all 0.3s; cursor: pointer; }
+        .nav-item i { font-size: 22px; margin-bottom: 4px; display: block; }
+        .nav-item.active { color: #8b5cf6; transform: translateY(-2px); }
         
-        /* 大按钮样式 */
-        .action-btn {
-            background-color: #f0b90b;
-            color: black;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            max-width: 300px;
-            margin-top: 10px;
-            transition: transform 0.1s;
-        }
-        .action-btn:active { transform: scale(0.95); opacity: 0.8; }
+        /* 页面切换动画 */
+        .page-section { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .page-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 简单的日志显示区 */
-        #log-area {
-            font-size: 12px;
-            color: #00ff00;
-            text-align: left;
-            margin-top: 10px;
-            background: black;
-            padding: 5px;
-            height: 60px;
-            overflow-y: auto;
-            border: 1px solid #333;
-        }
+        /* 按钮样式 */
+        .btn-primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border-radius: 12px; padding: 12px; text-align: center; font-weight: bold; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); }
+        .btn-outline { border: 1px solid #475569; color: #cbd5e1; border-radius: 12px; padding: 12px; text-align: center; }
     </style>
 </head>
 <body>
 
-    <!-- 这是一个独立的调试面板，放在最上面 -->
-    <div id="debug-panel">
-        <h2 style="margin:0 0 10px 0;">🛠️ 资产连接器</h2>
-        <div class="status-text" id="wallet-status">等待连接...</div>
-        
-        <!-- 显示余额的地方 -->
-        <div id="balances" style="display:none;">
-            <div class="balance-text">HTB: <span id="bal-htb">Loading...</span></div>
-            <div class="balance-text">YAiS: <span id="bal-yais">Loading...</span></div>
-            <div class="balance-text">QLB: <span id="bal-qlb">Loading...</span></div>
+    <!-- 顶部 Header -->
+    <div class="flex justify-between items-center p-6 pt-8">
+        <div>
+            <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">YAiS 生态</h1>
+            <p class="text-xs text-slate-400 mt-1">恒通算力 · 价值闭环</p>
         </div>
-
-        <button class="action-btn" onclick="connectWallet()">👉 点击连接钱包</button>
-        
-        <!-- 日志窗口，方便看报错 -->
-        <div id="log-area">系统就绪...</div>
+        <!-- 修复后的 Logo (使用图床链接) -->
+        <img src="https://i.imgur.com/uQ7q5yX.png" alt="Logo" class="w-12 h-12 rounded-full border-2 border-indigo-500 shadow-lg object-cover bg-slate-800">
     </div>
 
-    <!-- 下面保留你原本的网页内容不动 -->
-    <div style="padding: 20px; text-align: center; opacity: 0.5;">
-        <p>（原网页内容在下方，如果底部菜单回来了，说明修复成功）</p>
-    </div>
-
-    <script>
-        // 配置区域
-        const CONFIG = {
-            htb: "0xbb6f0D3C7676007c3e7445a421116f2627b54444",
-            yais: "0x3f435310b025424193ba5f59964219fc67964444",
-            qlb: "0xea491e0077236b8b22d03cbd4372f28207b54444"
-        };
-
-        // 简易日志函数
-        function log(msg) {
-            const el = document.getElementById('log-area');
-            el.innerHTML += "<br>> " + msg;
-            el.scrollTop = el.scrollHeight;
-            console.log(msg);
-        }
-
-        async function connectWallet() {
-            log("开始尝试连接...");
+    <!-- ================= 页面 1: 首页 (Home) ================= -->
+    <div id="page-home" class="page-section active px-5">
+        <!-- 资产卡片 -->
+        <div class="glass-card p-6 mb-6 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500 rounded-full filter blur-3xl opacity-10 -mr-10 -mt-10"></div>
+            <p class="text-sm text-slate-400 mb-2">总资产估值 (USDT)</p>
+            <h2 class="text-4xl font-bold text-white mb-6">$0.00</h2>
             
-            // 1. 检查环境
-            if (typeof window.ethereum === 'undefined') {
-                // 针对 TP 钱包的特殊检测
-                if (window.tokenpocket && window.tokenpocket.ethereum) {
-                    window.ethereum = window.tokenpocket.ethereum;
-                    log("检测到 TP 钱包环境");
-                } else {
-                    alert("未检测到钱包！请在 TP 钱包或 MetaMask 的 DApp 浏览器中打开此页面。");
-                    log("错误：未找到钱包");
-                    return;
-                }
-            }
-
-            try {
-                // 2. 请求连接
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                await provider.send("eth_requestAccounts", []);
-                const signer = provider.getSigner();
-                const address = await signer.getAddress();
-                
-                // 3. 连接成功 UI 更新
-                document.getElementById('wallet-status').innerText = "已连接: " + address.substring(0,6) + "..." + address.substring(38);
-                document.getElementById('wallet-status').style.color = "#00ff00";
-                document.getElementById('balances').style.display = "block";
-                log("连接成功: " + address);
-
-                // 4. 查询余额 (简化版，只查 HTB 做演示，防止代码太长出错)
-                checkBalance(provider, address, CONFIG.htb, 'bal-htb', 18);
-                checkBalance(provider, address, CONFIG.yais, 'bal-yais', 18);
-                checkBalance(provider, address, CONFIG.qlb, 'bal-qlb', 18);
-
-            } catch (error) {
-                log("连接失败: " + error.message);
-                console.error(error);
-            }
-        }
-
-        async function checkBalance(provider, address, contractAddress, elementId, decimals) {
-            try {
-                // 标准的 ERC20 余额查询接口
-                const abi = ["function balanceOf(address owner) view returns (uint256)"];
-                const contract = new ethers.Contract(contractAddress, abi, provider);
-                const balance = await contract.balanceOf(address);
-                const formatted = ethers.utils.formatUnits(balance, decimals);
-                document.getElementById(elementId).innerText = parseFloat(formatted).toFixed(2);
-                log(elementId + " 查询成功");
-            } catch (e) {
-                document.getElementById(elementId).innerText = "查询失败";
-                log(elementId + " 错误");
-            }
-        }
-    </script>
-</body>
-</html>
-<!-- === 开始粘贴：TP钱包连接修复补丁 === -->
-<script type="text/javascript">
-    // 等待页面完全加载后再运行，防止卡死
-    window.addEventListener('load', function() {
-        console.log("修复脚本已启动...");
-
-        // 1. 尝试寻找你的连接按钮
-        // 注意：如果你的按钮ID不是 'connectBtn'，请根据实际情况修改，或者脚本会尝试模糊匹配
-        var btn = document.getElementById('connectBtn') || 
-                  document.querySelector('button'); // 临时方案：如果找不到特定ID，先找第一个按钮测试
-
-        // 2. 定义连接逻辑
-        async function connectWallet() {
-            if (typeof window.ethereum !== 'undefined') {
-                try {
-                    alert("正在唤起钱包...");
-                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    const account = accounts[0];
-                    alert("连接成功！地址: " + account);
-                    // 这里可以添加后续逻辑，比如跳转页面
-                } catch (error) {
-                    console.error(error);
-                    alert("连接失败或取消");
-                }
-            } else {
-                alert("未检测到钱包环境，请在TP钱包App内打开");
-            }
-        }
-
-        // 3. 绑定点击事件
-        if (btn) {
-            btn.onclick = connectWallet;
-            console.log("按钮修复成功");
-        } else {
-            console.warn("未找到按钮，请检查HTML中的ID");
-        }
-    });
-</script>
-<!-- === 结束粘贴 === -->
-<!-- === YAiS 生态资产查询模块 (独立悬浮版) === -->
-<div id="yais-wallet-widget" style="position: fixed; bottom: 20px; right: 20px; z-index: 99999; font-family: sans-serif;">
-    <!-- 悬浮按钮 -->
-    <button id="yais-connect-btn" onclick="toggleYAiSWallet()" style="background: #f0b90b; color: #000; border: none; padding: 12px 20px; border-radius: 30px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer; display: flex; align-items: center; gap: 8px;">
-        <span>🦊</span> <span id="yais-btn-text">连接钱包</span>
-    </button>
-
-    <!-- 资产详情面板 (默认隐藏) -->
-    <div id="yais-asset-panel" style="display: none; position: absolute; bottom: 60px; right: 0; width: 280px; background: rgba(20, 20, 20, 0.95); backdrop-filter: blur(10px); border: 1px solid #333; border-radius: 12px; padding: 15px; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-        <div style="font-size: 12px; color: #aaa; margin-bottom: 10px; text-align: right;" id="yais-address-display">未连接</div>
-        
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 5px;">
-            <span>HTB (稳定币)</span>
-            <span id="yais-bal-htb" style="color: #f0b90b; font-weight: bold;">Loading...</span>
+            <div class="grid grid-cols-3 gap-3">
+                <div class="bg-slate-800/50 p-3 rounded-xl text-center border border-slate-700">
+                    <p class="text-xs text-slate-400 mb-1">HTB</p>
+                    <p class="font-bold text-yellow-500">0</p>
+                </div>
+                <div class="bg-slate-800/50 p-3 rounded-xl text-center border border-slate-700">
+                    <p class="text-xs text-slate-400 mb-1">YAiS</p>
+                    <p class="font-bold text-blue-400">0</p>
+                </div>
+                <div class="bg-slate-800/50 p-3 rounded-xl text-center border border-slate-700">
+                    <p class="text-xs text-slate-400 mb-1">QLB</p>
+                    <p class="font-bold text-orange-400">0</p>
+                </div>
+            </div>
         </div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 5px;">
-            <span>YAiS (释放币)</span>
-            <span id="yais-bal-yais" style="color: #a371f7; font-weight: bold;">Loading...</span>
+
+        <!-- 节点引擎 -->
+        <div class="glass-card p-5 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center">
+                    <span class="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                    <h3 class="font-bold text-lg">节点加速引擎</h3>
+                </div>
+                <span class="text-xs bg-indigo-900 text-indigo-300 px-2 py-1 rounded">运行中</span>
+            </div>
+            <div class="flex justify-between text-sm mb-2">
+                <span class="text-slate-400">当前持有节点</span>
+                <span class="text-white font-bold">0 个</span>
+            </div>
+            <div class="flex justify-between text-sm mb-4">
+                <span class="text-slate-400">今日预估释放</span>
+                <span class="text-blue-400 font-bold">+0 YAiS</span>
+            </div>
+            <!-- 进度条 -->
+            <div class="w-full bg-slate-700 rounded-full h-2 mb-2">
+                <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full" style="width: 0%"></div>
+            </div>
+            <p class="text-xs text-right text-slate-500">倍率: 1.0x (未激活)</p>
         </div>
-        <div style="display: flex; justify-content: space-between;">
-            <span>QLB (算力币)</span>
-            <span id="yais-bal-qlb" style="color: #58a6ff; font-weight: bold;">Loading...</span>
+
+        <!-- 快捷操作入口 -->
+        <h3 class="text-lg font-bold mb-4 ml-1">快速闪充 / 兑换</h3>
+        <div class="grid grid-cols-2 gap-4">
+            <div onclick="switchTab('exchange')" class="glass-card p-4 flex flex-col items-center justify-center active:scale-95 transition-transform cursor-pointer">
+                <i class="fa-solid fa-arrow-right-arrow-left text-2xl text-indigo-400 mb-2"></i>
+                <span class="text-sm font-medium">U 换 HTB</span>
+            </div>
+            <div onclick="switchTab('exchange')" class="glass-card p-4 flex flex-col items-center justify-center active:scale-95 transition-transform cursor-pointer">
+                <i class="fa-solid fa-fire text-2xl text-orange-400 mb-2"></i>
+                <span class="text-sm font-medium">YAiS 换 QLB</span>
+            </div>
         </div>
     </div>
-</div>
 
-<script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js"></script>
-<script>
-    // 配置中心
-    const YAiS_CONFIG = {
-        htb: "0xbb6fec528ffd252f6f22d6d05608599645144444",
-        yais: "0x3f431ffcda5ce875a45d462272a07ab1886d4444",
-        qlb: "0xea491e0077236b8b22d03cbd4372f28207b54444" // 已修正为正确地址
-    };
-
-    let yaisProvider, yaisSigner, yaisUserAddress;
-
-    async function toggleYAiSWallet() {
-        const btnText = document.getElementById('yais-btn-text');
-        const panel = document.getElementById('yais-asset-panel');
+    <!-- ================= 页面 2: 节点 (Nodes) ================= -->
+    <div id="page-nodes" class="page-section px-5">
+        <h2 class="text-2xl font-bold mb-6">购买节点</h2>
         
-        // 如果已经连接，则切换面板显示/隐藏
-        if (yaisUserAddress) {
-            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-            return;
-        }
+        <div class="glass-card p-5 mb-4 border-l-4 border-yellow-500">
+            <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg">初级节点包</h3>
+                <span class="bg-yellow-500/20 text-yellow-500 text-xs px-2 py-1 rounded">1.6x 倍率</span>
+            </div>
+            <p class="text-sm text-slate-400 mb-4">适合新手入门，稳健释放。</p>
+            <div class="flex justify-between items-center">
+                <span class="text-xl font-bold text-white">100 HTB</span>
+                <button class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-sm transition-colors">立即购买</button>
+            </div>
+        </div>
 
-        // 开始连接逻辑
-        btnText.innerText = "连接中...";
-        if (typeof window.ethereum !== 'undefined') {
-            try {
-                yaisProvider = new ethers.providers.Web3Provider(window.ethereum);
-                await yaisProvider.send("eth_requestAccounts", []);
-                yaisSigner = yaisProvider.getSigner();
-                yaisUserAddress = await yaisSigner.getAddress();
-                
-                // 更新 UI
-                btnText.innerText = "查看资产";
-                document.getElementById('yais-address-display').innerText = yaisUserAddress.substring(0,6) + "..." + yaisUserAddress.substring(38);
-                panel.style.display = 'block';
-                
-                // 查询余额
-                fetchYAiSBalances();
-            } catch (error) {
-                console.error(error);
-                btnText.innerText = "连接失败";
-                alert("连接被取消或出错");
-            }
-        } else {
-            alert("请在 TokenPocket 或 MetaMask 中打开此页面");
-            btnText.innerText = "无钱包环境";
-        }
-    }
+        <div class="glass-card p-5 mb-4 border-l-4 border-blue-500">
+            <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg">中级节点包</h3>
+                <span class="bg-blue-500/20 text-blue-500 text-xs px-2 py-1 rounded">2.0x 倍率</span>
+            </div>
+            <p class="text-sm text-slate-400 mb-4">主流选择，收益最大化。</p>
+            <div class="flex justify-between items-center">
+                <span class="text-xl font-bold text-white">1000 HTB</span>
+                <button class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm transition-colors">立即购买</button>
+            </div>
+        </div>
 
-    async function fetchYAiSBalances() {
-        if (!yaisUserAddress) return;
-        const abi = ["function balanceOf(address owner) view returns (uint256)", "function decimals() view returns (uint8)"];
-        
-        // 查询 HTB
-        const cHTB = new ethers.Contract(YAiS_CONFIG.htb, abi, yaisProvider);
-        const bHTB = await cHTB.balanceOf(yaisUserAddress);
-        const dHTB = await cHTB.decimals();
-        document.getElementById('yais-bal-htb').innerText = parseFloat(ethers.utils.formatUnits(bHTB, dHTB)).toFixed(2);
-
-        // 查询 YAiS
-        const cYAiS = new ethers.Contract(YAiS_CONFIG.yais, abi, yaisProvider);
-        const bYAiS = await cYAiS.balanceOf(yaisUserAddress);
-        const dYAiS = await cYAiS.decimals();
-        document.getElementById('yais-bal-yais').innerText = parseFloat(ethers.utils.formatUnits(bYAiS, dYAiS)).toFixed(2);
-
-        // 查询 QLB
-        const cQLB = new ethers.Contract(YAiS_CONFIG.qlb, abi, yaisProvider);
-        const bQLB = await cQLB.balanceOf(yaisUserAddress);
-        const dQLB = await cQLB.decimals();
-        document.getElementById('yais-bal-qlb').innerText = parseFloat(ethers.utils.formatUnits(bQLB, dQLB)).toFixed(2);
-    }
-</script>
-<!-- === 结束 === -->
-<!-- === YAiS 生态资产查询模块 (终极精简版) === -->
-<div id="yais-widget" style="position:fixed; bottom:20px; right:20px; z-index:99999;">
-    <button onclick="yaisConnect()" style="background:#f0b90b; border:none; padding:10px 20px; border-radius:20px; font-weight:bold; box-shadow:0 4px 10px rgba(0,0,0,0.3);">🦊 连接钱包</button>
-    <div id="yais-info" style="display:none; position:absolute; bottom:50px; right:0; width:250px; background:rgba(0,0,0,0.9); color:white; padding:15px; border-radius:10px; border:1px solid #333;">
-        <div>HTB: <span id="v-htb">...</span></div>
-        <div>YAiS: <span id="v-yais">...</span></div>
-        <div>QLB: <span id="v-qlb">...</span></div>
+        <div class="glass-card p-5 mb-4 border-l-4 border-purple-500">
+            <div class="flex justify-between items-start mb-2">
+                <h3 class="font-bold text-lg">高级节点包</h3>
+                <span class="bg-purple-500/20 text-purple-500 text-xs px-2 py-1 rounded">3.0x 倍率</span>
+            </div>
+            <p class="text-sm text-slate-400 mb-4"> whale 专属，极速回本。</p>
+            <div class="flex justify-between items-center">
+                <span class="text-xl font-bold text-white">3000 HTB</span>
+                <button class="bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded-lg text-sm transition-colors">立即购买</button>
+            </div>
+        </div>
     </div>
-</div>
-<script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js"></script>
-<script>
-async function yaisConnect(){
-    if(typeof window.ethereum=='undefined'){alert("请在TP钱包打开");return;}
-    try{
-        const p=new ethers.providers.Web3Provider(window.ethereum);
-        await p.send("eth_requestAccounts",[]);
-        const a=await p.getSigner().getAddress();
-        document.getElementById('yais-info').style.display='block';
-        const abi=["function balanceOf(address) view returns(uint256)","function decimals() view returns(uint8)"];
-        const c=(addr)=>new ethers.Contract(addr,abi,p);
-        const f=(addr,id,d)=>c(addr).balanceOf(a).then(b=>c(addr).decimals().then(d=>document.getElementById(id).innerText=parseFloat(ethers.utils.formatUnits(b,d)).toFixed(2)));
-        f("0xbb6fec528ffd252f6f22d6d05608599645144444","v-htb");
-        f("0x3f431ffcda5ce875a45d462272a07ab1886d4444","v-yais");
-        f("0xea491e0077236b8b22d03cbd4372f28207b54444","v-qlb");
-    }catch(e){console.error(e);}
-}
-</script>
-<!-- === 结束 === -->
+
+    <!-- ================= 页面 3: AI应用 (Apps) ================= -->
+    <div id="page-apps" class="page-section px-5">
+        <h2 class="text-2xl font-bold mb-2">擎力算力市场</h2>
+        <p class="text-sm text-slate-400 mb-6">消耗 QLB 获取 AI 算力或产品</p>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div class="glass-card p-4 text-center">
+                <div class="w-12 h-12 bg-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-image text-pink-500 text-xl"></i>
+                </div>
+                <h3 class="font-bold mb-1">AI 绘画</h3>
+                <p class="text-xs text-slate-400 mb-3">消耗 10 QLB/次</p>
+                <button class="w-full py-1.5 bg-slate-700 rounded text-xs">立即生成</button>
+            </div>
+            
+            <div class="glass-card p-4 text-center">
+                <div class="w-12 h-12 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fa-solid fa-video text-indigo-500 text-xl"></i>
+                </div>
+                <h3 class="font-bold mb-1">AI 视频</h3>
+                <p class="text-xs text-slate-400 mb-3">消耗 50 QLB/分钟</p>
+                <button class="w-full py-1.5 bg-slate-700 rounded text-xs">开始制作</button>
+            </div>
+
+            <div class="glass-card p-4 text-center col-span-2 flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center mr-3">
+                        <i class="fa-solid fa-server text-orange-500"></i>
+                    </div>
+                    <div class="text-left">
+                        <h3 class="font-bold text-sm">质押算力</h3>
+                        <p class="text-xs text-slate-400">出售闲置算力赚 USDT</p>
+                    </div>
+                </div>
+                <button class="px-4 py-2 bg-orange-600 rounded-lg text-sm">去质押</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= 页面 4: 我的 (Profile) ================= -->
+    <div id="page-profile" class="page-section px-5">
+        <div class="flex items-center mb-8 mt-4">
+            <img src="https://i.imgur.com/uQ7q5yX.png" class="w-16 h-16 rounded-full border-2 border-indigo-500 mr-4">
+            <div>
+                <h2 class="text-xl font-bold">用户_8848</h2>
+                <p class="text-xs text-slate-400">ID: 9527001</p>
+            </div>
+        </div>
+
+        <div class="glass-card overflow-hidden mb-6">
+            <div class="p-4 border-b border-slate-700 flex justify-between items-center active:bg-slate-800">
+                <span><i class="fa-solid fa-wallet w-6 text-indigo-400"></i> 充值记录</span>
+                <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
+            </div>
+            <div class="p-4 border-b border-slate-700 flex justify-between items-center active:bg-slate-800">
+                <span><i class="fa-solid fa-money-bill-transfer w-6 text-green-400"></i> 提现记录</span>
+                <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
+            </div>
+            <div class="p-4 flex justify-between items-center active:bg-slate-800">
+                <span><i class="fa-solid fa-gear w-6 text-slate-400"></i> 设置</span>
+                <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
+            </div>
+        </div>
+        
+        <button class="w-full py
