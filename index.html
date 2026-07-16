@@ -232,3 +232,29 @@
         <span>💰 连接钱包</span>
     </button>
 </div>
+<!-- === 极简悬浮钱包 (最终修复版 V3) === -->
+<!-- 引入图标库，防止图标不显示 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div id="wallet-float" style="position: fixed; bottom: 120px; right: 20px; z-index: 99999;">
+    <button id="connect-wallet-btn" 
+            onclick="toggleWallet()" 
+            style="background: #f0b90b; color: black; border: none; padding: 12px 24px; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.5); cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
+        <i class="fa-solid fa-wallet"></i> 连接钱包
+    </button>
+</div>
+
+<script>
+    function toggleWallet() {
+        var btn = document.getElementById('connect-wallet-btn');
+        // 简单的点击反馈动画
+        btn.style.transform = "scale(0.95)";
+        setTimeout(function(){
+            btn.style.transform = "scale(1)";
+            alert("正在唤起钱包... (模拟连接成功)");
+            // 这里以后可以换成真实的连接逻辑
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> 已连接';
+            btn.style.background = "#ffffff"; // 变白表示成功
+        }, 150);
+    }
+</script>
