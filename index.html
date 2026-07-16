@@ -164,6 +164,49 @@
             </button>
         </div>
     </div>
+    <!-- === 资产合约地址展示区 === -->
+<div style="background: #1a1a1a; padding: 15px; border-radius: 10px; margin: 20px 15px; color: white; font-family: sans-serif;">
+    <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #f0b90b;">💰 充值收款地址</h3>
+    
+    <!-- HTB -->
+    <div style="margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 8px;">
+        <div style="font-size: 12px; color: #aaa;">HTB (恒通稳定币)</div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
+            <span style="font-size: 11px; word-break: break-all; color: #ddd;">0xbb6f...4444</span>
+            <button onclick="copyAddr('0xbb6fec528ffd252f6f22d6d05608599645144444')" style="background: #f0b90b; border: none; padding: 4px 10px; border-radius: 5px; font-size: 12px; cursor: pointer;">复制</button>
+        </div>
+    </div>
+
+    <!-- YAiS -->
+    <div style="margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 8px;">
+        <div style="font-size: 12px; color: #aaa;">YAiS (生态释放币)</div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
+            <span style="font-size: 11px; word-break: break-all; color: #ddd;">0x3f43...4444</span>
+            <button onclick="copyAddr('0x3f431ffcda5ce875a45d462272a07ab1886d4444')" style="background: #f0b90b; border: none; padding: 4px 10px; border-radius: 5px; font-size: 12px; cursor: pointer;">复制</button>
+        </div>
+    </div>
+
+    <!-- QLB -->
+    <div style="padding-bottom: 8px;">
+        <div style="font-size: 12px; color: #aaa;">QLB (算力币)</div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
+            <span style="font-size: 11px; word-break: break-all; color: #ddd;">0xea49...4444</span>
+            <button onclick="copyAddr('0xea491e0077236b8b22d03cbd4372f28207b54444')" style="background: #f0b90b; border: none; padding: 4px 10px; border-radius: 5px; font-size: 12px; cursor: pointer;">复制</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyAddr(addr) {
+    navigator.clipboard.writeText(addr).then(() => {
+        alert("✅ 地址已复制！\n请打开您的钱包进行转账。");
+    }).catch(err => {
+        alert("复制失败，请长按手动复制");
+    });
+}
+</script>
+<!-- === 结束 === -->
+    
 <!-- 底部导航 (最终修复版) -->
 <div class="bottom-nav">
     <!-- 首页 -->
