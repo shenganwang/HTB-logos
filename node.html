@@ -5,43 +5,137 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI生态节点 - 算力中心</title>
     <style>
-        body { margin: 0; padding: 0; background-color: #0d0d0d; color: white; font-family: sans-serif; padding-bottom: 80px; }
+      <body>
+    <!-- 1. 顶部状态栏 -->
+    <div class="header">
+        <h1>⚡ AI 算力网络</h1>
+        <span class="status-badge">● 主网运行中</span>
+    </div>
+
+    <!-- 2. 核心数据看板 -->
+    <div class="dashboard">
+        <div class="card full">
+            <div class="label">我的总算力 (HTB)</div>
+            <div class="value" id="totalHash">12,450.00</div>
+            <div class="sub">预计日产出: 35.2 HTB</div>
+        </div>
+        <div class="card">
+            <div class="label">在线节点</div>
+            <div class="value small">3 <span class="unit">个</span></div>
+        </div>
+        <div class="card">
+            <div class="label">累计贡献</div>
+            <div class="value small">892 <span class="unit">小时</span></div>
+        </div>
+    </div>
+
+    <!-- 3. 运行中的节点列表 -->
+    <div style="padding: 0 20px;">
+        <h3 style="color: #fff; border-left: 4px solid #f0b90b; padding-left: 10px;">运行中的节点</h3>
         
-        /* 顶部标题栏 */
-        .header { padding: 20px; background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
-        .header h1 { margin: 0; font-size: 20px; color: #f0b90b; }
-        .status-badge { background: rgba(0, 255, 127, 0.1); color: #00ff7f; padding: 4px 8px; border-radius: 4px; font-size: 12px; border: 1px solid #00ff7f; }
+        <!-- 节点卡片 1 -->
+        <div class="node-item">
+            <div class="node-info">
+                <div class="node-name">超级验证节点 A-01</div>
+                <div class="node-desc">类型：基础层 | 质押：5000 HTB</div>
+            </div>
+            <div class="node-status">
+                <div class="profit">+12.5 /h</div>
+                <div class="status-dot">● 运行正常</div>
+            </div>
+        </div>
 
-        /* 核心数据卡片 */
-        .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 15px; }
-        .card { background: #1e1e1e; padding: 15px; border-radius: 12px; text-align: center; border: 1px solid #333; }
-        .card.full { grid-column: span 2; background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%); border: 1px solid #f0b90b; }
-        .card h3 { margin: 0 0 5px 0; font-size: 12px; color: #888; }
-        .card .num { font-size: 24px; font-weight: bold; color: white; }
-        .card .unit { font-size: 12px; color: #666; }
-        .card.full .num { color: #f0b90b; font-size: 32px; }
+        <!-- 节点卡片 2 -->
+        <div class="node-item">
+            <div class="node-info">
+                <div class="node-name">边缘计算节点 B-03</div>
+                <div class="node-desc">类型：应用层 | 质押：2000 HTB</div>
+            </div>
+            <div class="node-status">
+                <div class="profit">+8.2 /h</div>
+                <div class="status-dot">● 运行正常</div>
+            </div>
+        </div>
+    </div>
 
-        /* 节点列表 */
-        .section-title { padding: 0 15px; font-size: 16px; font-weight: bold; margin-top: 10px; display: flex; align-items: center; }
-        .section-title::before { content: ''; display: block; width: 4px; height: 16px; background: #f0b90b; margin-right: 8px; border-radius: 2px; }
+    <!-- 4. 【新增】购买模拟器与计算器 -->
+    <div style="margin: 20px; padding: 20px; background: #1a1a1a; border-radius: 12px; border: 1px solid #333;">
+        <h3 style="color: #f0b90b; margin-top: 0;">🛒 部署新节点</h3>
         
-        .node-list { padding: 15px; }
-        .node-item { background: #161616; padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid #00ff7f; }
-        .node-info h4 { margin: 0 0 5px 0; font-size: 15px; }
-        .node-info p { margin: 0; font-size: 12px; color: #888; }
-        .node-status { text-align: right; }
-        .node-status .hash { font-size: 12px; color: #f0b90b; margin-bottom: 4px; }
-        .node-status .state { font-size: 12px; color: #00ff7f; }
+        <div style="margin-bottom: 15px;">
+            <label style="font-size: 12px; color: #888;">投入节点数量 (1个=1 HTB)</label>
+            <input type="number" id="nodeInput" placeholder="请输入数量 (如 1000)" 
+                   style="width: 93%; padding: 12px; background: #0d0d0d; border: 1px solid #444; color: white; border-radius: 8px; font-size: 16px; margin-top: 5px;">
+        </div>
 
-        /* 底部操作区 */
-        .action-area { position: fixed; bottom: 0; left: 0; width: 100%; background: #1a1a1a; padding: 15px; box-sizing: border-box; border-top: 1px solid #333; display: flex; gap: 10px; z-index: 100; }
-        .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; }
-        .btn-primary { background: #f0b90b; color: black; }
-        .btn-secondary { background: #333; color: white; border: 1px solid #555; }
-    </style>
-</head>
-<body>
+        <!-- 计算结果展示区 -->
+        <div id="calcResult" style="background: #0d0d0d; padding: 15px; border-radius: 8px; display: none;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="color: #888;">当前档位倍率：</span>
+                <span style="color: #00ff88; font-weight: bold;" id="showRate">-</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span style="color: #888;">预计每日释放 YAiS：</span>
+                <span style="color: #f0b90b; font-weight: bold; font-size: 18px;" id="showYais">-</span>
+            </div>
+        </div>
 
+        <button class="btn-primary" style="width: 100%; margin-top: 15px; padding: 15px; background: #f0b90b; border: none; border-radius: 8px; color: black; font-weight: bold; font-size: 16px;">立即支付 HTB 部署</button>
+    </div>
+
+    <!-- 底部导航栏 (保持一致) -->
+    <div class="action-area">
+        <div class="nav-item">
+            <div style="font-size: 20px;">🏠</div>
+            <div style="font-size: 10px; color: #888;">首页</div>
+        </div>
+        <div class="nav-item active">
+            <div style="font-size: 20px;">⚡</div>
+            <div style="font-size: 10px; color: #f0b90b;">节点</div>
+        </div>
+        <div class="nav-item">
+            <div style="font-size: 20px;">🤖</div>
+            <div style="font-size: 10px; color: #888;">AI应用</div>
+        </div>
+        <div class="nav-item">
+            <div style="font-size: 20px;">👤</div>
+            <div style="font-size: 10px; color: #888;">我的</div>
+        </div>
+    </div>
+
+    <!-- 5. 【核心逻辑】JavaScript 脚本 -->
+    <script>
+        // 监听输入框的变化
+        document.getElementById('nodeInput').addEventListener('input', function(e) {
+            var count = parseInt(e.target.value); // 获取输入的数量
+            var resultBox = document.getElementById('calcResult');
+            var rateText = document.getElementById('showRate');
+            var yaisText = document.getElementById('showYais');
+
+            if (count > 0) {
+                resultBox.style.display = 'block'; // 显示结果区域
+                
+                var rate = 1; // 默认倍率
+                // --- 这里是我们刚才定的逻辑 ---
+                if (count >= 100 && count <= 999) {
+                    rate = 1.6;
+                } else if (count >= 1000 && count <= 2999) {
+                    rate = 2.0;
+                } else if (count >= 3000) {
+                    rate = 3.0;
+                }
+                
+                // 计算公式：数量 * 0.005 * 倍率
+                var dailyYais = (count * 0.005 * rate).toFixed(2); 
+
+                rateText.innerText = rate + " 倍";
+                yaisText.innerText = dailyYais + " YAiS";
+            } else {
+                resultBox.style.display = 'none'; // 如果没输入或为0，隐藏结果
+            }
+        });
+    </script>
+</body>
     <!-- 顶部状态 -->
     <div class="header">
         <h1>⚡ AI 算力网络</h1>
