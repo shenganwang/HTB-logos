@@ -194,3 +194,101 @@
     });
 </script>
 <!-- === 结束粘贴 === -->
+<!-- === YAiS 生态资产查询模块 (独立悬浮版) === -->
+<div id="yais-wallet-widget" style="position: fixed; bottom: 20px; right: 20px; z-index: 99999; font-family: sans-serif;">
+    <!-- 悬浮按钮 -->
+    <button id="yais-connect-btn" onclick="toggleYAiSWallet()" style="background: #f0b90b; color: #000; border: none; padding: 12px 20px; border-radius: 30px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer; display: flex; align-items: center; gap: 8px;">
+        <span>🦊</span> <span id="yais-btn-text">连接钱包</span>
+    </button>
+
+    <!-- 资产详情面板 (默认隐藏) -->
+    <div id="yais-asset-panel" style="display: none; position: absolute; bottom: 60px; right: 0; width: 280px; background: rgba(20, 20, 20, 0.95); backdrop-filter: blur(10px); border: 1px solid #333; border-radius: 12px; padding: 15px; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <div style="font-size: 12px; color: #aaa; margin-bottom: 10px; text-align: right;" id="yais-address-display">未连接</div>
+        
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 5px;">
+            <span>HTB (稳定币)</span>
+            <span id="yais-bal-htb" style="color: #f0b90b; font-weight: bold;">Loading...</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px solid #333; padding-bottom: 5px;">
+            <span>YAiS (释放币)</span>
+            <span id="yais-bal-yais" style="color: #a371f7; font-weight: bold;">Loading...</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+            <span>QLB (算力币)</span>
+            <span id="yais-bal-qlb" style="color: #58a6ff; font-weight: bold;">Loading...</span>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js"></script>
+<script>
+    // 配置中心
+    const YAiS_CONFIG = {
+        htb: "0xbb6fec528ffd252f6f22d6d05608599645144444",
+        yais: "0x3f431ffcda5ce875a45d462272a07ab1886d4444",
+        qlb: "0xea491e0077236b8b22d03cbd4372f28207b54444" // 已修正为正确地址
+    };
+
+    let yaisProvider, yaisSigner, yaisUserAddress;
+
+    async function toggleYAiSWallet() {
+        const btnText = document.getElementById('yais-btn-text');
+        const panel = document.getElementById('yais-asset-panel');
+        
+        // 如果已经连接，则切换面板显示/隐藏
+        if (yaisUserAddress) {
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            return;
+        }
+
+        // 开始连接逻辑
+        btnText.innerText = "连接中...";
+        if (typeof window.ethereum !== 'undefined') {
+            try {
+                yaisProvider = new ethers.providers.Web3Provider(window.ethereum);
+                await yaisProvider.send("eth_requestAccounts", []);
+                yaisSigner = yaisProvider.getSigner();
+                yaisUserAddress = await yaisSigner.getAddress();
+                
+                // 更新 UI
+                btnText.innerText = "查看资产";
+                document.getElementById('yais-address-display').innerText = yaisUserAddress.substring(0,6) + "..." + yaisUserAddress.substring(38);
+                panel.style.display = 'block';
+                
+                // 查询余额
+                fetchYAiSBalances();
+            } catch (error) {
+                console.error(error);
+                btnText.innerText = "连接失败";
+                alert("连接被取消或出错");
+            }
+        } else {
+            alert("请在 TokenPocket 或 MetaMask 中打开此页面");
+            btnText.innerText = "无钱包环境";
+        }
+    }
+
+    async function fetchYAiSBalances() {
+        if (!yaisUserAddress) return;
+        const abi = ["function balanceOf(address owner) view returns (uint256)", "function decimals() view returns (uint8)"];
+        
+        // 查询 HTB
+        const cHTB = new ethers.Contract(YAiS_CONFIG.htb, abi, yaisProvider);
+        const bHTB = await cHTB.balanceOf(yaisUserAddress);
+        const dHTB = await cHTB.decimals();
+        document.getElementById('yais-bal-htb').innerText = parseFloat(ethers.utils.formatUnits(bHTB, dHTB)).toFixed(2);
+
+        // 查询 YAiS
+        const cYAiS = new ethers.Contract(YAiS_CONFIG.yais, abi, yaisProvider);
+        const bYAiS = await cYAiS.balanceOf(yaisUserAddress);
+        const dYAiS = await cYAiS.decimals();
+        document.getElementById('yais-bal-yais').innerText = parseFloat(ethers.utils.formatUnits(bYAiS, dYAiS)).toFixed(2);
+
+        // 查询 QLB
+        const cQLB = new ethers.Contract(YAiS_CONFIG.qlb, abi, yaisProvider);
+        const bQLB = await cQLB.balanceOf(yaisUserAddress);
+        const dQLB = await cQLB.decimals();
+        document.getElementById('yais-bal-qlb').innerText = parseFloat(ethers.utils.formatUnits(bQLB, dQLB)).toFixed(2);
+    }
+</script>
+<!-- === 结束 === -->
