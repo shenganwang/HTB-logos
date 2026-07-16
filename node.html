@@ -5,6 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI生态节点 - 算力中心</title>
     <style>
+        /* === 动画特效区域 === */
+
+/* 1. 按钮点击时的 Q 弹效果 */
+.btn-buy-active {
+    transform: scale(0.95); /* 稍微缩小 */
+    transition: transform 0.1s;
+}
+
+/* 2. 弹窗出现的动画 (从下往上滑) */
+@keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-content {
+    animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* 带一点回弹 */
+}
+
+/* 3. 余额数字变化的闪烁效果 */
+.balance-flash {
+    color: #fff !important; /* 变白一下 */
+    text-shadow: 0 0 10px #4caf50;
+    transition: all 0.2s;
+}
       <body>
     <!-- 1. 顶部状态栏 -->
     <div class="header">
@@ -625,70 +649,129 @@
 
 <!-- === 这里的 Script 是大脑，负责处理买卖逻辑 === -->
 <script>
-    // 配置价格
+    // === 1. 全局配置 ===
     const NODE_PRICE = 100; 
-
-    // 页面加载完成后立即运行
+    
+    // === 2. 页面加载 ===
     document.addEventListener('DOMContentLoaded', function() {
-        console.log("节点系统已启动...");
-        loadData(); // 读取数据
-        updateUI(); // 更新界面
+        initData(); // 初始化数据
+        updateUI(); // 渲染界面
         
-        // 监听购买按钮点击
-        document.getElementById('buy-node-btn').addEventListener('click', function() {
-            buyNode();
-        });
+        // 绑定购买按钮事件
+        const buyBtn = document.getElementById('buy-node-btn');
+        if(buyBtn) {
+            // 增加触摸反馈动画
+            buyBtn.addEventListener('touchstart', function() {
+                this.classList.add('btn-buy-active');
+            });
+            buyBtn.addEventListener('touchend', function() {
+                this.classList.remove('btn-buy-active');
+                handleBuyNode(); // 手指离开时触发购买
+            });
+            // 兼容电脑鼠标点击
+            buyBtn.addEventListener('click', handleBuyNode);
+        }
     });
 
-    // --- 核心逻辑函数 ---
+    // === 3. 核心购买逻辑 ===
+    function handleBuyNode() {
+        let balance = parseFloat(localStorage.getItem('htb_balance') || 0);
+        let nodes = parseInt(localStorage.getItem('htb_nodes') || 0);
 
-    // 1. 从浏览器内存里读取数据
-    function loadData() {
-        if (!localStorage.getItem('htb_balance')) {
-            localStorage.setItem('htb_balance', '0'); // 默认余额
-        }
-        if (!localStorage.getItem('htb_nodes')) {
-            localStorage.setItem('htb_nodes', '0');   // 默认节点数
-        }
-    }
-
-    // 2. 更新界面上的数字
-    function updateUI() {
-        let balance = parseFloat(localStorage.getItem('htb_balance'));
-        let nodes = parseInt(localStorage.getItem('htb_nodes'));
-        
-        document.getElementById('user-balance').innerText = balance.toFixed(2);
-        document.getElementById('current-nodes').innerText = nodes;
-    }
-
-    // 3. 执行购买逻辑
-    function buyNode() {
-        let balance = parseFloat(localStorage.getItem('htb_balance'));
-        let nodes = parseInt(localStorage.getItem('htb_nodes'));
+        // 震动反馈 (仅安卓手机有效)
+        if (navigator.vibrate) navigator.vibrate(50); 
 
         if (balance >= NODE_PRICE) {
-            // 钱够：扣钱，加节点，保存
-            balance = balance - NODE_PRICE;
-            nodes = nodes + 1;
+            // --- 购买成功 ---
+            // 1. 扣钱
+            animateBalanceChange(balance, balance - NODE_PRICE);
+            localStorage.setItem('htb_balance', (balance - NODE_PRICE).toFixed(2));
             
-            localStorage.setItem('htb_balance', balance);
-            localStorage.setItem('htb_nodes', nodes);
+            // 2. 加节点
+            localStorage.setItem('htb_nodes', nodes + 1);
             
-            updateUI(); // 刷新界面
-            alert("✅ 购买成功！\n扣除 " + NODE_PRICE + " HTB\n当前节点数：" + nodes);
+            // 3. 延迟一点点更新界面，配合数字动画
+            setTimeout(() => {
+                updateUI();
+                showModal("购买成功！", "恭喜您成功部署了一个新节点。\n每日产出将自动增加。", true);
+            }, 600);
+
         } else {
-            // 钱不够：弹窗提示
-            alert("❌ 余额不足！\n需要：" + NODE_PRICE + " HTB\n当前：" + balance + " HTB");
+            // --- 余额不足 ---
+            showModal("余额不足", `当前余额: ${balance} HTB\n节点价格: ${NODE_PRICE} HTB\n\n请先去充值再试。`, false);
         }
     }
 
-    // 4. 【隐藏功能】点击余额文字，自动加 200 块钱用来测试
+    // === 4. 辅助功能：数字滚动动画 ===
+    function animateBalanceChange(start, end) {
+        const el = document.getElementById('user-balance');
+        const duration = 600; // 动画时长
+        const startTime = performance.now();
+
+        function update(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // 计算当前应该显示的数字
+            const currentVal = start + (end - start) * progress;
+            el.innerText = currentVal.toFixed(2);
+            
+            // 添加闪烁特效类
+            el.classList.add('balance-flash');
+
+            if (progress < 1) {
+                requestAnimationFrame(update);
+            } else {
+                el.classList.remove('balance-flash'); // 动画结束移除特效
+            }
+        }
+        requestAnimationFrame(update);
+    }
+
+    // === 5. 辅助功能：测试充值 (点击余额触发) ===
     function addTestMoney() {
-        let balance = parseFloat(localStorage.getItem('htb_balance'));
-        balance = balance + 200;
-        localStorage.setItem('htb_balance', balance);
-        updateUI();
-        alert("💰 测试充值成功！加了 200 HTB");
+        let balance = parseFloat(localStorage.getItem('htb_balance') || 0);
+        let newBalance = balance + 100;
+        
+        // 播放数字滚动动画
+        animateBalanceChange(balance, newBalance);
+        
+        localStorage.setItem('htb_balance', newBalance.toFixed(2));
+        // 动画结束后更新真实数值
+        setTimeout(updateUI, 600);
+    }
+
+    // === 6. 辅助功能：更新界面显示 ===
+    function updateUI() {
+        const balance = localStorage.getItem('htb_balance') || "0.00";
+        const nodes = localStorage.getItem('htb_nodes') || "0";
+        
+        document.getElementById('user-balance').innerText = parseFloat(balance).toFixed(2);
+        document.getElementById('user-nodes').innerText = nodes;
+    }
+
+    // === 7. 辅助功能：初始化数据 ===
+    function initData() {
+        if (!localStorage.getItem('htb_balance')) localStorage.setItem('htb_balance', "0.00");
+        if (!localStorage.getItem('htb_nodes')) localStorage.setItem('htb_nodes', "0");
+    }
+
+    // === 8. 辅助功能：漂亮的弹窗 ===
+    function showModal(title, msg, isSuccess) {
+        // 如果已经有弹窗，先移除
+        const oldModal = document.getElementById('custom-modal');
+        if(oldModal) oldModal.remove();
+
+        const modalHtml = `
+            <div id="custom-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; display: flex; align-items: center; justify-content: center;">
+                <div class="modal-content" style="background: #fff; width: 80%; max-width: 300px; border-radius: 16px; padding: 25px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+                    <h3 style="margin-top: 0; color: #333; font-size: 20px;">${title}</h3>
+                    <p style="color: #666; line-height: 1.6; white-space: pre-line; margin-bottom: 25px;">${msg}</p>
+                    <button onclick="document.getElementById('custom-modal').remove()" style="background: ${isSuccess ? '#4caf50' : '#ff5722'}; color: white; border: none; padding: 10px 30px; border-radius: 20px; font-size: 16px; cursor: pointer; width: 100%;">确认</button>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
     }
 </script>
 </body>
