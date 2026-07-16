@@ -521,76 +521,6 @@
         color: #ffd700; /* 金色 */
     }
 </style>
-
-<script>
-    // === 1. 页面加载完成后执行 ===
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log("节点页面已加载，正在初始化...");
-        
-        // 初始化时先读取一次数据
-        updatePageDisplay();
-        
-        // 给购买按钮绑定点击事件
-        const buyBtn = document.getElementById('buy-node-btn');
-        if(buyBtn) {
-            buyBtn.addEventListener('click', handleBuyNode);
-        } else {
-            console.error("错误：找不到购买按钮！请检查ID是否为 buy-node-btn");
-        }
-    });
-
-    // === 2. 核心功能：处理购买点击 ===
-    function handleBuyNode() {
-        console.log("用户点击了购买按钮");
-
-        // A. 获取当前最新的数据 (从 localStorage 读取)
-        let currentBalance = parseFloat(localStorage.getItem('userBalance')) || 0;
-        let currentNodes = parseInt(localStorage.getItem('userNodes')) || 0;
-        
-        // 设定节点价格 (比如 100 HTB)
-        const NODE_PRICE = 100; 
-
-        // B. 判断余额是否充足
-        if (currentBalance < NODE_PRICE) {
-            // 【关键点】这里就是你要的提示！
-            alert(`余额不足！\n\n当前余额: ${currentBalance} HTB\n节点价格: ${NODE_PRICE} HTB\n\n请先去充值再试。`);
-            return; // 停止执行，不买
-        }
-
-        // C. 执行购买 (扣钱，加节点)
-        if (confirm(`确定要花费 ${NODE_PRICE} HTB 购买一个节点吗？`)) {
-            // 更新数据
-            currentBalance -= NODE_PRICE;
-            currentNodes += 1;
-
-            // 保存回本地存储
-            localStorage.setItem('userBalance', currentBalance.toFixed(2));
-            localStorage.setItem('userNodes', currentNodes);
-
-            // 刷新页面显示
-            updatePageDisplay();
-            
-            alert("购买成功！您的算力已提升。");
-        }
-    }
-
-    // === 3. 辅助功能：更新页面显示的数字 ===
-    function updatePageDisplay() {
-        // 从本地存储读取数据，如果没有就默认为 0
-        const balance = parseFloat(localStorage.getItem('userBalance')) || 0;
-        const nodes = parseInt(localStorage.getItem('userNodes')) || 0;
-
-        // 找到页面上的元素
-        const balanceEl = document.getElementById('user-balance');
-        const nodesEl = document.getElementById('current-nodes');
-
-        // 更新文字
-        if(balanceEl) balanceEl.innerText = balance.toFixed(2);
-        if(nodesEl) nodesEl.innerText = nodes;
-        
-        console.log(`当前状态 -> 余额: ${balance}, 节点: ${nodes}`);
-    }
-</script>
         <!-- === 节点页面核心内容 (开始) === -->
     <div style="padding: 20px; padding-bottom: 80px; color: #fff;">
         
@@ -664,5 +594,102 @@
 
 </div>
 <!-- === 节点页面核心内容区域 (结束) === -->
+    <!-- === 节点页面核心内容区域 (开始) === -->
+<div class="page-content" style="padding: 20px; padding-bottom: 80px;">
+    
+    <!-- 1. 顶部标题 -->
+    <h2 style="color: #fff; text-align: center; margin-bottom: 30px;">算力节点中心</h2>
+
+    <!-- 2. 余额卡片 -->
+    <div style="background: #2a2a2a; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
+        <p style="color: #aaa; font-size: 14px; margin: 0;">我的可用余额 (HTB)</p>
+        <!-- 点击这个数字可以给自己充值测试 -->
+        <h1 id="user-balance" onclick="addTestMoney()" style="color: #4caf50; margin: 10px 0; font-size: 32px; cursor: pointer;">0.00</h1>
+        <p style="color: #666; font-size: 12px;">(点击余额可测试充值)</p>
+    </div>
+
+    <!-- 3. 节点持有卡片 -->
+    <div style="background: #2a2a2a; padding: 20px; border-radius: 12px; margin-bottom: 30px; text-align: center;">
+        <p style="color: #aaa; font-size: 14px; margin: 0;">当前持有节点数</p>
+        <h1 id="current-nodes" style="color: #2196f3; margin: 10px 0; font-size: 32px;">0</h1>
+        <p style="color: #666; font-size: 12px;">每个节点每日产出 0.01 YAIS</p>
+    </div>
+
+    <!-- 4. 购买按钮 -->
+    <button id="buy-node-btn" style="width: 100%; padding: 15px; background: linear-gradient(90deg, #ff9800, #ff5722); border: none; border-radius: 25px; color: white; font-size: 18px; font-weight: bold; box-shadow: 0 4px 15px rgba(255, 87, 34, 0.4);">
+        立即购买节点 (100 HTB)
+    </button>
+
+</div>
+<!-- === 节点页面核心内容区域 (结束) === -->
+
+<!-- === 这里的 Script 是大脑，负责处理买卖逻辑 === -->
+<script>
+    // 配置价格
+    const NODE_PRICE = 100; 
+
+    // 页面加载完成后立即运行
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("节点系统已启动...");
+        loadData(); // 读取数据
+        updateUI(); // 更新界面
+        
+        // 监听购买按钮点击
+        document.getElementById('buy-node-btn').addEventListener('click', function() {
+            buyNode();
+        });
+    });
+
+    // --- 核心逻辑函数 ---
+
+    // 1. 从浏览器内存里读取数据
+    function loadData() {
+        if (!localStorage.getItem('htb_balance')) {
+            localStorage.setItem('htb_balance', '0'); // 默认余额
+        }
+        if (!localStorage.getItem('htb_nodes')) {
+            localStorage.setItem('htb_nodes', '0');   // 默认节点数
+        }
+    }
+
+    // 2. 更新界面上的数字
+    function updateUI() {
+        let balance = parseFloat(localStorage.getItem('htb_balance'));
+        let nodes = parseInt(localStorage.getItem('htb_nodes'));
+        
+        document.getElementById('user-balance').innerText = balance.toFixed(2);
+        document.getElementById('current-nodes').innerText = nodes;
+    }
+
+    // 3. 执行购买逻辑
+    function buyNode() {
+        let balance = parseFloat(localStorage.getItem('htb_balance'));
+        let nodes = parseInt(localStorage.getItem('htb_nodes'));
+
+        if (balance >= NODE_PRICE) {
+            // 钱够：扣钱，加节点，保存
+            balance = balance - NODE_PRICE;
+            nodes = nodes + 1;
+            
+            localStorage.setItem('htb_balance', balance);
+            localStorage.setItem('htb_nodes', nodes);
+            
+            updateUI(); // 刷新界面
+            alert("✅ 购买成功！\n扣除 " + NODE_PRICE + " HTB\n当前节点数：" + nodes);
+        } else {
+            // 钱不够：弹窗提示
+            alert("❌ 余额不足！\n需要：" + NODE_PRICE + " HTB\n当前：" + balance + " HTB");
+        }
+    }
+
+    // 4. 【隐藏功能】点击余额文字，自动加 200 块钱用来测试
+    function addTestMoney() {
+        let balance = parseFloat(localStorage.getItem('htb_balance'));
+        balance = balance + 200;
+        localStorage.setItem('htb_balance', balance);
+        updateUI();
+        alert("💰 测试充值成功！加了 200 HTB");
+    }
+</script>
 </body>
 </html>
