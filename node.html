@@ -386,5 +386,85 @@
     }
 </script>
 <!-- ================= 结束 ================= -->
+    <!-- === 通用底部导航栏 (开始) === -->
+<nav class="bottom-nav">
+    <!-- 首页按钮 -->
+    <a href="index.html" class="nav-item" id="nav-index">
+        <div class="icon">🏠</div>
+        <span>首页</span>
+    </a>
+    
+    <!-- 节点/算力按钮 -->
+    <a href="node.html" class="nav-item" id="nav-node">
+        <div class="icon">⚡</div>
+        <span>节点</span>
+    </a>
+    
+    <!-- 我的/资产按钮 -->
+    <a href="my.html" class="nav-item" id="nav-my">
+        <div class="icon">👤</div>
+        <span>我的</span>
+    </a>
+</nav>
+
+<style>
+    /* 底部导航样式 - 统一风格 */
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 60px;
+        background-color: #1a1a1a; /* 深灰背景 */
+        border-top: 1px solid #333;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        z-index: 1000;
+        padding-bottom: env(safe-area-inset-bottom); /* 适配 iPhone 底部横条 */
+    }
+
+    .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-decoration: none;
+        color: #888; /* 默认灰色 */
+        font-size: 12px;
+        transition: color 0.3s;
+    }
+
+    .nav-item .icon {
+        font-size: 24px;
+        margin-bottom: 4px;
+    }
+
+    /* 激活状态 - 金色高亮 */
+    .nav-item.active {
+        color: #ffd700; /* 金色 */
+    }
+</style>
+
+<script>
+    // 自动高亮当前页面的导航按钮
+    document.addEventListener("DOMContentLoaded", function() {
+        // 获取当前文件名
+        const path = window.location.pathname;
+        const page = path.split("/").pop(); 
+
+        // 移除所有激活状态
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+        // 根据文件名添加激活状态
+        if (page === 'index.html' || page === '') {
+            document.getElementById('nav-index').classList.add('active');
+        } else if (page === 'node.html') {
+            document.getElementById('nav-node').classList.add('active');
+        } else if (page === 'my.html') {
+            document.getElementById('nav-my').classList.add('active');
+        }
+    });
+</script>
+<!-- === 通用底部导航栏 (结束) === -->
 </body>
 </html>
