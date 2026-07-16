@@ -155,3 +155,42 @@
     </script>
 </body>
 </html>
+<!-- === 开始粘贴：TP钱包连接修复补丁 === -->
+<script type="text/javascript">
+    // 等待页面完全加载后再运行，防止卡死
+    window.addEventListener('load', function() {
+        console.log("修复脚本已启动...");
+
+        // 1. 尝试寻找你的连接按钮
+        // 注意：如果你的按钮ID不是 'connectBtn'，请根据实际情况修改，或者脚本会尝试模糊匹配
+        var btn = document.getElementById('connectBtn') || 
+                  document.querySelector('button'); // 临时方案：如果找不到特定ID，先找第一个按钮测试
+
+        // 2. 定义连接逻辑
+        async function connectWallet() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    alert("正在唤起钱包...");
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    const account = accounts[0];
+                    alert("连接成功！地址: " + account);
+                    // 这里可以添加后续逻辑，比如跳转页面
+                } catch (error) {
+                    console.error(error);
+                    alert("连接失败或取消");
+                }
+            } else {
+                alert("未检测到钱包环境，请在TP钱包App内打开");
+            }
+        }
+
+        // 3. 绑定点击事件
+        if (btn) {
+            btn.onclick = connectWallet;
+            console.log("按钮修复成功");
+        } else {
+            console.warn("未找到按钮，请检查HTML中的ID");
+        }
+    });
+</script>
+<!-- === 结束粘贴 === -->
