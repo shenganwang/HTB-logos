@@ -197,13 +197,59 @@
 </div>
 
 <script>
-function copyAddr(addr) {
-    navigator.clipboard.writeText(addr).then(() => {
-        alert("✅ 地址已复制！\n请打开您的钱包进行转账。");
-    }).catch(err => {
-        alert("复制失败，请长按手动复制");
+    // === 1. 定义全局数据对象 (这就是我们的"公共账本") ===
+    let userData = {
+        htb: 1000.00,      // 稳定币
+        yais: 200.00,      // 释放币
+        qlb: 50.00,        // 算力币
+        nodes: 1000,       // 节点数量
+        multiplier: 2.0    // 倍率
+    };
+
+    // === 2. 初始化函数：检查有没有旧账本 ===
+    function initData() {
+        // 尝试从浏览器读取数据
+        const savedData = localStorage.getItem('yais_user_data');
+        
+        if (savedData) {
+            // 如果有存档，就用存档的数据（这样数据就互通了！）
+            userData = JSON.parse(savedData);
+        } else {
+            // 如果是第一次来，就保存一份初始数据
+            saveData(); 
+        }
+        
+        updateUI(); // 刷新界面显示
+    }
+
+    // === 3. 保存函数：把数据写入浏览器 ===
+    function saveData() {
+        localStorage.setItem('yais_user_data', JSON.stringify(userData));
+    }
+
+    // === 4. 更新界面显示 ===
+    function updateUI() {
+        // 更新顶部余额
+        document.getElementById('htb-balance').innerText = userData.htb.toFixed(2);
+        document.getElementById('yais-balance').innerText = userData.yais.toFixed(2);
+        document.getElementById('qlb-balance').innerText = userData.qlb.toFixed(2);
+        
+        // 更新总资产估算
+        let total = userData.htb * 1 + userData.yais * 0.1 + userData.qlb * 0.01;
+        document.getElementById('total-assets').innerText = total.toFixed(2);
+
+        // 更新节点信息
+        document.getElementById('node-count').innerText = userData.nodes;
+        // 这里模拟一个简单的每日释放计算
+        let dailyRelease = userData.nodes * 0.01 * userData.multiplier; 
+        document.getElementById('daily-release').innerText = "+" + dailyRelease.toFixed(2) + " YAiS";
+    }
+
+    // === 启动程序 ===
+    // 确保页面加载完再运行
+    document.addEventListener("DOMContentLoaded", function() {
+        initData();
     });
-}
 </script>
 <!-- === 结束 === -->
     
