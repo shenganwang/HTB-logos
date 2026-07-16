@@ -292,3 +292,31 @@
     }
 </script>
 <!-- === 结束 === -->
+<!-- === YAiS 生态资产查询模块 (终极精简版) === -->
+<div id="yais-widget" style="position:fixed; bottom:20px; right:20px; z-index:99999;">
+    <button onclick="yaisConnect()" style="background:#f0b90b; border:none; padding:10px 20px; border-radius:20px; font-weight:bold; box-shadow:0 4px 10px rgba(0,0,0,0.3);">🦊 连接钱包</button>
+    <div id="yais-info" style="display:none; position:absolute; bottom:50px; right:0; width:250px; background:rgba(0,0,0,0.9); color:white; padding:15px; border-radius:10px; border:1px solid #333;">
+        <div>HTB: <span id="v-htb">...</span></div>
+        <div>YAiS: <span id="v-yais">...</span></div>
+        <div>QLB: <span id="v-qlb">...</span></div>
+    </div>
+</div>
+<script src="https://cdn.ethers.io/lib/ethers-5.7.umd.min.js"></script>
+<script>
+async function yaisConnect(){
+    if(typeof window.ethereum=='undefined'){alert("请在TP钱包打开");return;}
+    try{
+        const p=new ethers.providers.Web3Provider(window.ethereum);
+        await p.send("eth_requestAccounts",[]);
+        const a=await p.getSigner().getAddress();
+        document.getElementById('yais-info').style.display='block';
+        const abi=["function balanceOf(address) view returns(uint256)","function decimals() view returns(uint8)"];
+        const c=(addr)=>new ethers.Contract(addr,abi,p);
+        const f=(addr,id,d)=>c(addr).balanceOf(a).then(b=>c(addr).decimals().then(d=>document.getElementById(id).innerText=parseFloat(ethers.utils.formatUnits(b,d)).toFixed(2)));
+        f("0xbb6fec528ffd252f6f22d6d05608599645144444","v-htb");
+        f("0x3f431ffcda5ce875a45d462272a07ab1886d4444","v-yais");
+        f("0xea491e0077236b8b22d03cbd4372f28207b54444","v-qlb");
+    }catch(e){console.error(e);}
+}
+</script>
+<!-- === 结束 === -->
