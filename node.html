@@ -884,5 +884,86 @@
     }
 </script>
 <!-- === 核心逻辑脚本 (结束) === -->
+    <script>
+    // === 这里的代码控制所有动画和逻辑 ===
+
+    // 1. 定义初始数据
+    let balance = 0;          // 当前余额
+    let appsInstalled = 0;    // 已安装应用数
+    const nodePrice = 35.2;   // 节点价格
+
+    // 获取页面上的元素（通过ID找到它们）
+    const balanceEl = document.getElementById('user-balance');
+    const appCountEl = document.getElementById('app-count');
+    
+    // 2. 核心功能：数字滚动动画 (让数字变化时像老虎机一样)
+    function animateValue(obj, start, end, duration) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            // 计算当前应该显示的数字
+            const currentVal = Math.floor(progress * (end - start) + start);
+            obj.innerHTML = currentVal.toFixed(2); // 保留两位小数
+            
+            // 添加闪烁特效类
+            obj.classList.add('balance-flash');
+            
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            } else {
+                // 动画结束，移除特效类
+                setTimeout(() => obj.classList.remove('balance-flash'), 200);
+            }
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    // 3. 模拟充值功能 (点击余额触发)
+    function addMoney() {
+        const oldBalance = balance;
+        balance += 100; // 每次加100
+        animateValue(balanceEl, oldBalance, balance, 800);
+    }
+
+    // 4. 购买节点功能
+    function buyNode() {
+        if (balance >= nodePrice) {
+            // 余额足够，执行扣款
+            const oldBalance = balance;
+            balance -= nodePrice;
+            
+            // 播放扣款动画
+            animateValue(balanceEl, oldBalance, balance, 500);
+            
+            // 震动反馈 (仅手机有效)
+            if (navigator.vibrate) navigator.vibrate(50);
+            
+            alert("🎉 购买成功！算力节点已激活。");
+        } else {
+            // 余额不足
+            alert("⚠️ 余额不足，请点击上方的余额数字进行充值！");
+        }
+    }
+
+    // 5. 打开 AI 应用市场 (那个消失的旋钮)
+    function openAppMarket() {
+        // 这里可以写跳转到应用市场的逻辑，现在先弹个窗演示
+        if(confirm("是否部署最新的 AI 绘画应用？(消耗 10 HTB)")) {
+             if (balance >= 10) {
+                balance -= 10;
+                appsInstalled++;
+                balanceEl.innerHTML = balance.toFixed(2);
+                appCountEl.innerHTML = appsInstalled;
+                alert("🚀 应用部署成功！");
+             } else {
+                 alert("余额不足以部署应用！");
+             }
+        }
+    }
+
+    // 初始化页面显示
+    balanceEl.innerHTML = "0.00";
+</script>
 </body>
 </html>
