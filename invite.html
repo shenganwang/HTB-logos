@@ -1,1 +1,341 @@
-
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>邀请好友 - YAiS生态</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0e27; color: #e2e8f0; min-height: 100vh; padding-bottom: 80px; position: relative; overflow-x: hidden; }
+body::before { content:''; position:fixed; top:0;left:0;right:0;bottom:0; background: radial-gradient(ellipse at 20% 0%, rgba(59,130,246,0.12) 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, rgba(139,92,246,0.08) 0%, transparent 50%); pointer-events:none; z-index:0; }
+.page { position:relative; z-index:1; max-width:430px; margin:0 auto; padding:0 16px 80px; }
+.glass-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 20px; margin-bottom: 16px; position:relative; overflow:hidden; }
+.glass-card::before { content:''; position:absolute; top:0;left:0;right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent); }
+.invite-header { padding: 40px 0 24px; text-align: center; }
+.invite-header h1 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+.invite-header p { font-size: 13px; color: rgba(255,255,255,0.5); }
+.invite-code-card { background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.15)); border: 1px solid rgba(59,130,246,0.3); border-radius: 20px; padding: 24px 20px; text-align: center; margin-bottom: 16px; }
+.invite-code-label { font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 12px; }
+.invite-code { font-size: 32px; font-weight: 900; letter-spacing: 8px; color: #fff; font-family: 'Courier New', monospace; margin-bottom: 16px; text-shadow: 0 0 20px rgba(59,130,246,0.5); }
+.invite-actions { display: flex; gap: 10px; }
+.invite-actions button { flex: 1; padding: 12px; border-radius: 12px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+.invite-actions button.btn-copy { background: linear-gradient(135deg, #3b82f6, #6366f1); color: #fff; }
+.invite-actions button.btn-share { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.15); }
+.invite-actions button:active { transform: scale(0.98); }
+.invite-link-box { background: rgba(0,0,0,0.2); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.invite-link-box .link-text { flex: 1; font-size: 12px; color: rgba(255,255,255,0.4); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: monospace; }
+.invite-link-box .copy-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); padding: 6px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; white-space: nowrap; }
+.stats-row { display: flex; gap: 12px; margin-bottom: 16px; }
+.stat-item { flex: 1; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 16px; text-align: center; }
+.stat-item .stat-num { font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+.stat-item .stat-label { font-size: 12px; color: rgba(255,255,255,0.4); }
+.invite-list { margin-bottom: 16px; }
+.invite-list-header { display: flex; justify-content: space-between; align-items: center; padding: 0 4px 12px; }
+.invite-list-header h3 { font-size: 16px; font-weight: 700; }
+.invite-list-header .filter { font-size: 12px; color: rgba(255,255,255,0.4); }
+.invite-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; padding: 14px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+.invite-item .user-info { display: flex; align-items: center; gap: 10px; }
+.invite-item .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, rgba(59,130,246,0.3), rgba(139,92,246,0.3)); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.invite-item .user-name { font-size: 14px; font-weight: 600; }
+.invite-item .user-addr { font-size: 11px; color: rgba(255,255,255,0.3); font-family: monospace; margin-top: 2px; }
+.invite-item .reward { text-align: right; }
+.invite-item .reward-amount { font-size: 14px; font-weight: 700; color: #10b981; }
+.invite-item .reward-status { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 2px; }
+.invite-item .reward-status.done { color: #10b981; }
+.invite-item .reward-status.pending { color: #f59e0b; }
+.empty-state { text-align: center; padding: 40px 20px; }
+.empty-state .empty-icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state .empty-text { font-size: 14px; color: rgba(255,255,255,0.4); }
+.rule-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 18px; }
+.rule-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+.rule-item { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-start; }
+.rule-item .rule-dot { width: 6px; height: 6px; border-radius: 50%; background: #3b82f6; margin-top: 7px; flex-shrink: 0; }
+.rule-item .rule-text { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.6; }
+.rule-item .rule-text strong { color: rgba(255,255,255,0.8); }
+.toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9); background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); color: #fff; padding: 16px 32px; border-radius: 12px; font-size: 14px; opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 1000; }
+.toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:430px; background:rgba(10,14,39,0.95); backdrop-filter:blur(20px); border-top:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-around; padding:8px 0 24px; z-index:100; }
+.nav-item { display:flex; flex-direction:column; align-items:center; text-decoration:none; color:rgba(255,255,255,0.35); font-size:11px; gap:4px; }
+.nav-item .icon { font-size:22px; }
+.nav-item.active { color:#3b82f6; }
+.modal-overlay { position: fixed; top:0;left:0;right:0;bottom:0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay.show { display: flex; }
+.modal-content { background: rgba(16, 20, 46, 0.95); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 28px; width: 100%; max-width: 320px; text-align: center; }
+.modal-content h3 { font-size: 16px; margin-bottom: 16px; }
+.qr-placeholder { width: 100%; min-height: 260px; background: linear-gradient(135deg, rgba(10,14,39,0.9), rgba(20,30,60,0.9)); border: 1px solid rgba(59,130,246,0.2); border-radius: 16px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+.qr-placeholder::before { content:''; position:absolute; inset:0; background: radial-gradient(ellipse at 50% 30%, rgba(59,130,246,0.15) 0%, transparent 60%), radial-gradient(ellipse at 30% 70%, rgba(139,92,246,0.1) 0%, transparent 50%), radial-gradient(ellipse at 70% 70%, rgba(6,182,212,0.08) 0%, transparent 50%); }
+.qr-placeholder svg { position:relative; z-index:1; }
+.modal-close { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 12px 24px; border-radius: 12px; font-size: 14px; cursor: pointer; width: 100%; }
+</style>
+</head>
+<body>
+<div class="page">
+    <div class="invite-header">
+        <h1>🎁 邀请好友</h1>
+        <p>邀请好友加入节点，双方均可获得奖励</p>
+    </div>
+    <div class="invite-code-card">
+        <div class="invite-code-label">我的专属邀请码</div>
+        <div class="invite-code" id="invite-code">------</div>
+        <div class="invite-link-box">
+            <span class="link-text" id="invite-link">https://ai.lzxjsm.cn/?ref=...</span>
+            <button class="copy-btn" onclick="copyLink()">复制链接</button>
+        </div>
+        <div class="invite-actions">
+            <button class="btn-copy" onclick="copyCode()">📋 复制邀请码</button>
+            <button class="btn-share" onclick="showQR()">📱 分享海报</button>
+        </div>
+    </div>
+    <div class="stats-row">
+        <div class="stat-item">
+            <div class="stat-num" id="stat-count">0</div>
+            <div class="stat-label">已邀请</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num" id="stat-active">0</div>
+            <div class="stat-label">有效节点</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num" id="stat-reward" style="color:#10b981;">0</div>
+            <div class="stat-label">累计奖励(YAiS)</div>
+        </div>
+    </div>
+    <div class="invite-list">
+        <div class="invite-list-header">
+            <h3>📋 邀请记录</h3>
+            <span class="filter">最近30天</span>
+        </div>
+        <div id="invite-list-content">
+        </div>
+    </div>
+    <div class="rule-card">
+        <h3>📖 奖励规则</h3>
+        <div class="rule-item">
+            <span class="rule-dot"></span>
+            <span class="rule-text"><strong>好友注册：</strong>被邀请人通过你的邀请链接或邀请码完成钱包连接，即视为有效注册</span>
+        </div>
+        <div class="rule-item">
+            <span class="rule-dot"></span>
+            <span class="rule-text"><strong>购买节点：</strong>好友首次购买节点，你将获得 <strong>5 YAiS</strong> 推荐奖励</span>
+        </div>
+        <div class="rule-item">
+            <span class="rule-dot"></span>
+            <span class="rule-text"><strong>持续收益：</strong>好友节点每日释放，你额外获得其释放量的 <strong>5%</strong> 作为团队奖励</span>
+        </div>
+        <div class="rule-item">
+            <span class="rule-dot"></span>
+            <span class="rule-text"><strong>阶梯加成：</strong>邀请满10人激活节点，团队奖励比例提升至 <strong>8%</strong></span>
+        </div>
+        <div class="rule-item">
+            <span class="rule-dot"></span>
+            <span class="rule-text"><strong>说明：</strong>所有奖励以 YAiS 形式发放，可直接在兑换页面转为 HT 提现</span>
+        </div>
+    </div>
+</div>
+<nav class="bottom-nav">
+    <a href="index.html" class="nav-item"><span class="icon">🏠</span><span>首页</span></a>
+    <a href="node.html" class="nav-item"><span class="icon">⚡</span><span>节点</span></a>
+    <a href="chart.html" class="nav-item"><span class="icon">📈</span><span>行情</span></a>
+    <a href="https://ysai.lzxjsm.cn/h5/5.html#/pages/index/index" class="nav-item" target="_blank"><span class="icon">🤖</span><span>AI应用</span></a>
+    <a href="my.html" class="nav-item"><span class="icon">👤</span><span>我的</span></a>
+</nav>
+<div class="toast" id="toast">已复制到剪贴板</div>
+<div class="modal-overlay" id="qr-modal">
+    <div class="modal-content">
+        <h3>📱 扫码邀请好友</h3>
+        <div class="qr-placeholder">
+            <svg width="260" height="260" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <radialGradient id="glow1" cx="50%" cy="35%" r="50%">
+                        <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.4"/>
+                        <stop offset="100%" stop-color="transparent"/>
+                    </radialGradient>
+                    <radialGradient id="glow2" cx="35%" cy="65%" r="40%">
+                        <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.3"/>
+                        <stop offset="100%" stop-color="transparent"/>
+                    </radialGradient>
+                    <radialGradient id="glow3" cx="65%" cy="55%" r="35%">
+                        <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.25"/>
+                        <stop offset="100%" stop-color="transparent"/>
+                    </radialGradient>
+                    <linearGradient id="brainGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#60a5fa"/>
+                        <stop offset="100%" stop-color="#a78bfa"/>
+                    </linearGradient>
+                    <linearGradient id="nodeGrad" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stop-color="#3b82f6"/>
+                        <stop offset="100%" stop-color="#818cf8"/>
+                    </linearGradient>
+                    <filter id="nodeGlow2">
+                        <feGaussianBlur stdDeviation="3" result="blur"/>
+                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                    <filter id="bgGlow">
+                        <feGaussianBlur stdDeviation="8"/>
+                    </filter>
+                </defs>
+                <circle cx="130" cy="130" r="120" fill="rgba(59,130,246,0.03)" stroke="rgba(59,130,246,0.1)" stroke-width="1"/>
+                <g transform="translate(130,90)" filter="url(#nodeGlow2)">
+                    <ellipse cx="0" cy="30" rx="55" ry="35" fill="none" stroke="url(#brainGrad)" stroke-width="1.5" opacity="0.6" stroke-dasharray="8,4"/>
+                    <ellipse cx="0" cy="30" rx="45" ry="28" fill="none" stroke="url(#brainGrad)" stroke-width="1" opacity="0.4" stroke-dasharray="4,6"/>
+                    <path d="M-25,25 C-25,5 -15,-15 0,-20 C15,-15 25,5 25,25 C25,40 20,55 15,60 C10,65 5,62 5,55 C5,50 8,40 8,35 C8,30 5,28 0,28 C-5,28 -8,30 -8,35 C-8,40 -5,50 -5,55 C-5,62 -10,65 -15,60 C-20,55 -25,40 -25,25Z" fill="url(#brainGrad)" opacity="0.9"/>
+                    <path d="M-15,10 C-10,5 10,5 15,10" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.2"/>
+                    <path d="M-12,20 C-5,16 5,16 12,20" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+                    <path d="M-8,32 C-3,30 3,30 8,32" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="0.8"/>
+                    <circle cx="0" cy="15" r="4" fill="#fff" opacity="0.5"/>
+                </g>
+                <g opacity="0.7">
+                    <line x1="55" y1="65" x2="90" y2="105" stroke="rgba(59,130,246,0.4)" stroke-width="1"/>
+                    <line x1="205" y1="65" x2="170" y2="105" stroke="rgba(139,92,246,0.4)" stroke-width="1"/>
+                    <line x1="55" y1="180" x2="90" y2="150" stroke="rgba(6,182,212,0.35)" stroke-width="1"/>
+                    <line x1="205" y1="180" x2="170" y2="150" stroke="rgba(6,182,212,0.35)" stroke-width="1"/>
+                    <line x1="130" y1="55" x2="130" y2="85" stroke="rgba(59,130,246,0.3)" stroke-width="1"/>
+                    <line x1="130" y1="170" x2="130" y2="150" stroke="rgba(139,92,246,0.3)" stroke-width="1"/>
+                    <line x1="75" y1="130" x2="100" y2="130" stroke="rgba(59,130,246,0.3)" stroke-width="1"/>
+                    <line x1="185" y1="130" x2="160" y2="130" stroke="rgba(139,92,246,0.3)" stroke-width="1"/>
+                </g>
+                <g filter="url(#nodeGlow2)">
+                    <circle cx="55" cy="65" r="6" fill="#3b82f6" opacity="0.9"/><circle cx="55" cy="65" r="3" fill="#fff" opacity="0.4"/>
+                    <circle cx="205" cy="65" r="6" fill="#8b5cf6" opacity="0.9"/><circle cx="205" cy="65" r="3" fill="#fff" opacity="0.4"/>
+                    <circle cx="55" cy="180" r="5" fill="#06b6d4" opacity="0.85"/><circle cx="55" cy="180" r="2.5" fill="#fff" opacity="0.4"/>
+                    <circle cx="205" cy="180" r="5" fill="#06b6d4" opacity="0.85"/><circle cx="205" cy="180" r="2.5" fill="#fff" opacity="0.4"/>
+                    <circle cx="130" cy="55" r="5" fill="#6366f1" opacity="0.85"/><circle cx="130" cy="55" r="2.5" fill="#fff" opacity="0.4"/>
+                    <circle cx="130" cy="170" r="5" fill="#6366f1" opacity="0.85"/><circle cx="130" cy="170" r="2.5" fill="#fff" opacity="0.4"/>
+                    <circle cx="75" cy="130" r="4" fill="#3b82f6" opacity="0.8"/><circle cx="75" cy="130" r="2" fill="#fff" opacity="0.3"/>
+                    <circle cx="185" cy="130" r="4" fill="#8b5cf6" opacity="0.8"/><circle cx="185" cy="130" r="2" fill="#fff" opacity="0.3"/>
+                </g>
+                <text x="130" y="245" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="11" font-family="sans-serif" letter-spacing="4">YAiS AI · 扫码加入</text>
+                <rect x="70" y="225" width="120" height="18" rx="9" fill="rgba(59,130,246,0.1)" stroke="rgba(59,130,246,0.2)" stroke-width="0.5"/>
+                <text id="modal-code-svg" x="130" y="238" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="bold" font-family="'Courier New',monospace" letter-spacing="2">------</text>
+            </svg>
+        </div>
+        <p style="font-size:13px; color:rgba(255,255,255,0.5); margin-bottom:16px;">邀请码：<strong id="modal-code" style="color:#3b82f6;">------</strong></p>
+        <button class="modal-close" onclick="closeQR()">关闭</button>
+    </div>
+</div>
+<script>
+function generateInviteCode() {
+    const walletAddr = localStorage.getItem('wallet_address');
+    if (walletAddr) {
+        const hash = hashCode(walletAddr);
+        const prefix = 'HT';
+        const suffix = hash.toString(36).toUpperCase().substring(0, 4).padEnd(4, 'A');
+        return prefix + suffix;
+    }
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let code = 'HT';
+    for (let i = 0; i < 4; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+}
+function hashCode(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+    return Math.abs(hash);
+}
+function initInvite() {
+    let inviteData = JSON.parse(localStorage.getItem('invite_data') || 'null');
+    if (!inviteData) {
+        inviteData = {
+            code: generateInviteCode(),
+            invites: [],
+            totalReward: 0,
+            activeNodes: 0
+        };
+        localStorage.setItem('invite_data', JSON.stringify(inviteData));
+    }
+    return inviteData;
+}
+function renderInvite() {
+    const data = initInvite();
+    document.getElementById('invite-code').innerText = data.code;
+    document.getElementById('invite-link').innerText = 'https://ai.lzxjsm.cn/?ref=' + data.code;
+    var svgCodeEl = document.getElementById('modal-code-svg');
+    if (svgCodeEl) svgCodeEl.textContent = data.code;
+    document.getElementById('modal-code').innerText = data.code;
+    document.getElementById('stat-count').innerText = data.invites.length;
+    document.getElementById('stat-active').innerText = data.activeNodes;
+    document.getElementById('stat-reward').innerText = data.totalReward.toFixed(2);
+    const listEl = document.getElementById('invite-list-content');
+    if (data.invites.length === 0) {
+        listEl.innerHTML = '<div class="empty-state"><div class="empty-icon">🤝</div><div class="empty-text">还没有好友加入<br>快分享你的邀请码吧！</div></div>';
+    } else {
+        listEl.innerHTML = data.invites.map((inv, i) => '<div class="invite-item"><div class="user-info"><div class="user-avatar">' + (inv.avatar || '🤖') + '</div><div><div class="user-name">' + (inv.name || '好友' + (i+1)) + '</div><div class="user-addr">' + (inv.addr ? inv.addr.slice(0,6) + '...' + inv.addr.slice(-4) : '地址未记录') + '</div></div></div><div class="reward"><div class="reward-amount">+' + (inv.reward || 5) + ' YAiS</div><div class="reward-status ' + (inv.paid ? 'done' : 'pending') + '">' + (inv.paid ? '已发放' : '待发放') + '</div></div></div>').join('');
+    }
+}
+function copyCode() {
+    const data = initInvite();
+    const code = data.code;
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(code).then(() => showToast('邀请码已复制: ' + code));
+    } else {
+        const ta = document.createElement('textarea');
+        ta.value = code;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast('邀请码已复制: ' + code);
+    }
+}
+function copyLink() {
+    const data = initInvite();
+    const link = 'https://ai.lzxjsm.cn/?ref=' + data.code;
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(link).then(() => showToast('邀请链接已复制'));
+    } else {
+        const ta = document.createElement('textarea');
+        ta.value = link;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast('邀请链接已复制');
+    }
+}
+function showQR() {
+    document.getElementById('qr-modal').classList.add('show');
+}
+function closeQR() {
+    document.getElementById('qr-modal').classList.remove('show');
+}
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.innerText = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+}
+function checkReferral() {
+    const url = new URL(window.location.href);
+    const ref = url.searchParams.get('ref');
+    if (ref && ref !== initInvite().code) {
+        localStorage.setItem('referrer_code', ref);
+        showToast('🎉 已绑定推荐人: ' + ref);
+    }
+}
+function generateDemoData() {
+    const data = initInvite();
+    if (data.invites.length === 0) {
+        data.invites = [
+            { name: '张三', addr: '0x7a9b...c3d4', avatar: '👤', reward: 5, paid: true, date: '2026-07-18' },
+            { name: '李四', addr: '0x3e5f...a2b1', avatar: '👤', reward: 5, paid: true, date: '2026-07-19' },
+            { name: '王五', addr: '0x9c2d...e8f7', avatar: '👤', reward: 5, paid: false, date: '2026-07-20' },
+        ];
+        data.activeNodes = 2;
+        data.totalReward = 10;
+        localStorage.setItem('invite_data', JSON.stringify(data));
+    }
+}
+document.addEventListener('DOMContentLoaded', () => {
+    checkReferral();
+    generateDemoData();
+    renderInvite();
+});
+</script>
+</body>
+</html>
