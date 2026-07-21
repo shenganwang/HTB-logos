@@ -23,16 +23,12 @@ body::before { content:''; position:fixed; top:0;left:0;right:0;bottom:0; backgr
 .btn.purple { background:linear-gradient(135deg,#8b5cf6,#a855f7); color:#fff; box-shadow:0 4px 16px rgba(139,92,246,0.3); }
 .btn.purple:active { transform:scale(0.98); }
 .section-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
-.text-blue { color: #3b82f6; }
-.text-purple { color: #8b5cf6; }
-.text-green { color: #10b981; }
-.text-yellow { color: #f59e0b; }
-.text-orange { color: #f97316; }
-.text-gray { color: rgba(255,255,255,0.5); }
 .tag { display:inline-block; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:500; }
 .tag-blue { background:rgba(59,130,246,0.2); color:#3b82f6; }
 .tag-green { background:rgba(16,185,129,0.2); color:#10b981; }
 .tag-purple { background:rgba(139,92,246,0.2); color:#8b5cf6; }
+.tag-red { background:rgba(239,68,68,0.15); color:#ef4444; }
+.tag-amber { background:rgba(245,158,11,0.15); color:#f59e0b; }
 .bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:430px; background:rgba(10,14,39,0.95); backdrop-filter:blur(20px); border-top:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-around; padding:8px 0 24px; z-index:100; }
 .nav-item { display:flex; flex-direction:column; align-items:center; text-decoration:none; color:rgba(255,255,255,0.35); font-size:11px; gap:4px; }
 .nav-item.active { color:#3b82f6; }
@@ -40,49 +36,65 @@ body::before { content:''; position:fixed; top:0;left:0;right:0;bottom:0; backgr
 .trade-arrow { display:flex; justify-content:center; margin:8px 0; }
 .trade-arrow div { width:32px; height:32px; background:rgba(255,255,255,0.08); border-radius:50%; display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.1); }
 .trade-arrow svg { width:16px; height:16px; color:rgba(255,255,255,0.5); }
+.fee-row { display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(245,158,11,0.06); border-radius:10px; margin:8px 0; font-size:12px; }
+.fee-row .fee-label { color:rgba(255,255,255,0.5); }
+.fee-row .fee-value { color:#f59e0b; font-weight:600; }
+.net-row { display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(16,185,129,0.06); border-radius:10px; margin:8px 0; font-size:12px; }
+.net-row .net-label { color:rgba(255,255,255,0.5); }
+.net-row .net-value { color:#10b981; font-weight:600; }
+.forbidden-card { display:flex; gap:6px; margin-top:4px; }
+.forbidden-item { flex:1; text-align:center; padding:10px 4px; background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.15); border-radius:10px; }
+.forbidden-item .path { font-size:11px; color:#ef4444; font-weight:600; }
+.forbidden-item .desc { font-size:10px; color:rgba(255,255,255,0.3); margin-top:4px; }
+.wallet-btn { display:flex; align-items:center; gap:6px; padding:8px 14px; background:rgba(59,130,246,0.15); border:1px solid rgba(59,130,246,0.3); border-radius:20px; color:#3b82f6; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.3s; }
+.wallet-btn:hover { background:rgba(59,130,246,0.25); }
+.wallet-btn.connected { background:rgba(16,185,129,0.15); border-color:rgba(16,185,129,0.3); color:#10b981; }
 @media (min-width:431px) { .bottom-nav { border-radius: 0 0 0 0; } }
 </style>
 </head>
 <body>
 <div class="page">
-    <!-- 顶部 -->
     <div style="display:flex; justify-content:space-between; align-items:center; padding:40px 0 8px;">
         <div>
             <h1 style="font-size:28px; font-weight:800; margin-bottom:4px;">YAiS 生态</h1>
-            <p style="font-size:12px; color:rgba(255,255,255,0.4);">恒通算力 · 价值闭环</p>
+            <p style="font-size:12px; color:rgba(255,255,255,0.4);">恒通算力 · 价值闭环 · BSC链</p>
         </div>
-        <div style="width:44px; height:44px; border-radius:50%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; overflow:hidden;">
-            <img id="header-logo" src="logo.png" alt="Logo" style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <button class="wallet-btn" id="wallet-btn" onclick="connectWallet()">
+                <span id="wallet-icon">&#128279;</span>
+                <span id="wallet-text">连接钱包</span>
+            </button>
+            <div style="width:44px; height:44px; border-radius:50%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                <img id="header-logo" src="logo.png" alt="Logo" style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'">
+            </div>
         </div>
     </div>
 
-    <!-- 资产总览 -->
     <div class="glass-card" style="position:relative;">
         <div style="position:absolute; top:-30px; right:-20px; width:140px; height:140px; background:radial-gradient(circle, rgba(139,92,246,0.15), transparent 70%); pointer-events:none;"></div>
         <p style="font-size:13px; color:rgba(255,255,255,0.5); margin-bottom:8px;">总资产估值 (USDT)</p>
         <h2 style="font-size:36px; font-weight:800; margin-bottom:16px;">$<span id="total-assets">0.00</span></h2>
         <div style="display:flex; gap:8px;">
             <div style="flex:1; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); border-radius:14px; padding:12px 8px; text-align:center;">
-                <p style="font-size:11px; color:rgba(255,255,255,0.4); margin-bottom:4px;">HTB (稳定币)</p>
-                <p style="font-weight:700; color:#f59e0b;"><span id="htb-balance">0</span></p>
+                <p style="font-size:11px; color:rgba(255,255,255,0.4); margin-bottom:4px;">HT 门户通证</p>
+                <p style="font-weight:700; color:#f59e0b;"><span id="ht-balance">0</span></p>
             </div>
             <div style="flex:1; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); border-radius:14px; padding:12px 8px; text-align:center;">
-                <p style="font-size:11px; color:rgba(255,255,255,0.4); margin-bottom:4px;">YAiS (释放币)</p>
+                <p style="font-size:11px; color:rgba(255,255,255,0.4); margin-bottom:4px;">YAiS 枢纽通证</p>
                 <p style="font-weight:700; color:#3b82f6;"><span id="yais-balance">0</span></p>
             </div>
             <div style="flex:1; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); border-radius:14px; padding:12px 8px; text-align:center;">
-                <p style="font-size:11px; color:rgba(255,255,255,0.4); margin-bottom:4px;">QLB (算力币)</p>
-                <p style="font-weight:700; color:#f97316;"><span id="qlb-balance">0</span></p>
+                <p style="font-size:11px; color:rgba(255,255,255,0.4); margin-bottom:4px;">QL 工具通证</p>
+                <p style="font-weight:700; color:#f97316;"><span id="ql-balance">0</span></p>
             </div>
         </div>
     </div>
 
-    <!-- 节点收益引擎 -->
     <div class="glass-card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
             <h3 style="font-weight:700; display:flex; align-items:center; gap:8px;">
                 <span style="width:8px; height:8px; background:#10b981; border-radius:50%; animation:pulse 2s infinite;"></span>
-                节点加速引擎
+                节点释放引擎
             </h3>
             <span class="tag tag-green">运行中</span>
         </div>
@@ -93,97 +105,125 @@ body::before { content:''; position:fixed; top:0;left:0;right:0;bottom:0; backgr
             </div>
             <div style="text-align:right;">
                 <p style="font-size:12px; color:rgba(255,255,255,0.4);">今日预估释放</p>
-                <p class="text-blue" style="font-size:20px; font-weight:700;" id="daily-release">+0 YAiS</p>
+                <p style="font-size:20px; font-weight:700; color:#3b82f6;" id="daily-release">+0 YAiS</p>
             </div>
         </div>
         <div style="margin-top:12px; height:6px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden;">
-            <div style="width:45%; height:100%; background:linear-gradient(90deg,#3b82f6,#8b5cf6); border-radius:3px;"></div>
+            <div id="release-progress" style="width:0%; height:100%; background:linear-gradient(90deg,#3b82f6,#8b5cf6); border-radius:3px; transition:width 0.5s;"></div>
         </div>
-        <p style="font-size:10px; color:rgba(255,255,255,0.3); text-align:right; margin-top:6px;">倍率: 2.0x (已激活)</p>
+        <p style="font-size:10px; color:rgba(255,255,255,0.3); text-align:right; margin-top:6px;">倍率: <span id="multiplier-text">1.0x</span> | 释放率: 0.5%/日</p>
     </div>
 
-    <!-- 快速闪充 / 兑换 -->
-    <h3 class="section-title" style="margin-top:4px;">快速闪充 / 兑换</h3>
+    <h3 class="section-title" style="margin-top:4px;">通证兑换</h3>
     <div style="display:flex; gap:0; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); border-radius:14px; padding:4px; margin-bottom:16px;">
-        <button onclick="switchTab('in')" id="tab-in" class="tab-btn tab-active">入金 (U→HTB)</button>
-        <button onclick="switchTab('out')" id="tab-out" class="tab-btn tab-inactive">变现/升级 (YAiS→)</button>
+        <button onclick="switchTab('in')" id="tab-in" class="tab-btn tab-active">入金 (USDT &#8594; HT)</button>
+        <button onclick="switchTab('out')" id="tab-out" class="tab-btn tab-inactive">变现/消耗 (YAiS &#8594;)</button>
     </div>
 
-    <!-- 入金面板 -->
     <div id="panel-in" class="glass-card">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <span style="font-size:14px; color:rgba(255,255,255,0.5);">支付 USDT</span>
-            <span style="font-size:12px; color:rgba(255,255,255,0.35);">余额: 5000.00</span>
+            <span style="font-size:12px; color:rgba(255,255,255,0.35);">余额: <span id="usdt-balance">5000.00</span></span>
         </div>
-        <div class="input-box" style="margin-bottom:16px;">
+        <div class="input-box" style="margin-bottom:8px;">
             <input type="number" id="input-usdt" placeholder="输入数量" oninput="calcExchange('in')">
             <span style="font-weight:700; color:rgba(255,255,255,0.4); margin-left:8px;">USDT</span>
         </div>
+        <div class="fee-row">
+            <span class="fee-label">手续费 (1%)</span>
+            <span class="fee-value" id="in-fee">0.00 USDT</span>
+        </div>
+        <div class="net-row">
+            <span class="net-label">净额到账</span>
+            <span class="net-value" id="in-net">0.00 USDT</span>
+        </div>
         <div class="trade-arrow"><div><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg></div></div>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <span style="font-size:14px; color:rgba(255,255,255,0.5);">获得 HTB</span>
-            <span class="tag tag-blue">1:1 锚定</span>
+            <span style="font-size:14px; color:rgba(255,255,255,0.5);">获得 HT</span>
+            <span class="tag tag-blue">汇率 1:1 锚定</span>
         </div>
         <div class="input-box" style="background:rgba(255,255,255,0.02);">
-            <input type="text" id="output-htb" readonly placeholder="0" style="color:#f59e0b; font-weight:700;">
-            <span style="font-weight:700; color:#f59e0b; margin-left:8px; opacity:0.6;">HTB</span>
+            <input type="text" id="output-ht" readonly placeholder="0" style="color:#f59e0b; font-weight:700;">
+            <span style="font-weight:700; color:#f59e0b; margin-left:8px; opacity:0.6;">HT</span>
         </div>
-        <button class="btn primary" style="margin-top:20px;">立即充值</button>
+        <button class="btn primary" style="margin-top:16px;" onclick="doExchange('in')">立即充值</button>
     </div>
 
-    <!-- 变现/升级面板 -->
     <div id="panel-out" class="glass-card" style="display:none;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <span style="font-size:14px; color:rgba(255,255,255,0.5);">支付 YAiS</span>
             <span style="font-size:12px; color:rgba(255,255,255,0.35);">可用: <span id="yais-available">0</span></span>
         </div>
-        <div class="input-box" style="margin-bottom:16px;">
+        <div class="input-box" style="margin-bottom:8px;">
             <input type="number" id="input-yais" placeholder="输入数量" style="color:#3b82f6;" oninput="calcExchange('out')">
             <span style="font-weight:700; color:#3b82f6; margin-left:8px; opacity:0.8;">YAiS</span>
         </div>
-        <div style="display:flex; gap:8px; margin-bottom:16px;">
+        <div style="display:flex; gap:8px; margin-bottom:8px;">
             <label style="flex:1; cursor:pointer;">
-                <input type="radio" name="out_type" value="htb" checked onchange="calcExchange('out')" style="display:none;">
-                <div id="opt-htb" style="padding:14px 10px; border-radius:14px; border:2px solid rgba(139,92,246,0.4); background:rgba(139,92,246,0.1); text-align:center; transition:all 0.3s;">
+                <input type="radio" name="out_type" value="ht" checked onchange="calcExchange('out')" style="display:none;">
+                <div id="opt-ht" style="padding:14px 10px; border-radius:14px; border:2px solid rgba(139,92,246,0.4); background:rgba(139,92,246,0.1); text-align:center; transition:all 0.3s;">
                     <div style="font-size:12px; color:#8b5cf6; margin-bottom:4px;">变现退出</div>
-                    <div style="font-weight:700; font-size:14px;">换 HTB (0.1)</div>
+                    <div style="font-weight:700; font-size:14px;">YAiS &#8594; HT</div>
+                    <div style="font-size:10px; color:rgba(255,255,255,0.4); margin-top:2px;">手续费 5%</div>
                 </div>
             </label>
             <label style="flex:1; cursor:pointer;">
-                <input type="radio" name="out_type" value="qlb" style="display:none;">
-                <div id="opt-qlb" style="padding:14px 10px; border-radius:14px; border:2px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.03); text-align:center; transition:all 0.3s;">
-                    <div style="font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:4px;">应用升级</div>
-                    <div style="font-weight:700; font-size:14px;">换 QLB (10)</div>
+                <input type="radio" name="out_type" value="ql" style="display:none;">
+                <div id="opt-ql" style="padding:14px 10px; border-radius:14px; border:2px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.03); text-align:center; transition:all 0.3s;">
+                    <div style="font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:4px;">应用消耗</div>
+                    <div style="font-weight:700; font-size:14px;">YAiS &#8594; QL</div>
+                    <div style="font-size:10px; color:rgba(255,255,255,0.3); margin-top:2px;">手续费 2% 单向</div>
                 </div>
             </label>
+        </div>
+        <div class="fee-row">
+            <span class="fee-label">手续费</span>
+            <span class="fee-value" id="out-fee">0.00 YAiS</span>
         </div>
         <div class="trade-arrow"><div><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg></div></div>
         <div class="input-box" style="background:rgba(255,255,255,0.02);">
             <input type="text" id="output-result" readonly placeholder="0" style="color:#fff; font-weight:700;">
-            <span id="result-unit" style="font-weight:700; color:rgba(255,255,255,0.4); margin-left:8px;">HTB</span>
+            <span id="result-unit" style="font-weight:700; color:rgba(255,255,255,0.4); margin-left:8px;">HT</span>
         </div>
-        <button class="btn purple" style="margin-top:20px;">确认兑换</button>
+        <button class="btn purple" style="margin-top:16px;" onclick="doExchange('out')">确认兑换</button>
     </div>
 
-    <!-- 充值收款地址 -->
+    <div class="glass-card">
+        <h3 style="font-size:14px; font-weight:700; color:rgba(255,255,255,0.6); margin-bottom:12px;">禁止兑换路径</h3>
+        <div class="forbidden-card">
+            <div class="forbidden-item">
+                <div class="path">HT &#8594; QL</div>
+                <div class="desc">需经YAiS中转</div>
+            </div>
+            <div class="forbidden-item">
+                <div class="path">QL &#8594; YAiS</div>
+                <div class="desc">不可逆</div>
+            </div>
+            <div class="forbidden-item">
+                <div class="path">QL &#8594; HT</div>
+                <div class="desc">不可逆</div>
+            </div>
+        </div>
+    </div>
+
     <div class="glass-card" style="margin-top:8px;">
-        <h3 style="font-size:16px; font-weight:700; color:#f59e0b; margin-bottom:14px;">💰 充值收款地址</h3>
+        <h3 style="font-size:16px; font-weight:700; color:#f59e0b; margin-bottom:14px;">充值收款地址 (BSC链)</h3>
         <div style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
-            <div style="font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:6px;">HTB (恒通稳定币)</div>
+            <div style="font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:6px;">HT (恒通门户通证)</div>
             <div style="display:flex; align-items:center; justify-content:space-between;">
                 <span style="font-size:12px; color:rgba(255,255,255,0.7); font-family:monospace;">0xbb6f...4444</span>
                 <button onclick="copyAddr('0xbb6fec528ffd252f6f22d6d05608599645144444')" style="background:rgba(245,158,11,0.2); border:none; color:#f59e0b; padding:6px 14px; border-radius:8px; font-size:12px; cursor:pointer; font-weight:600;">复制</button>
             </div>
         </div>
         <div style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
-            <div style="font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:6px;">YAiS (生态释放币)</div>
+            <div style="font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:6px;">YAiS (生态枢纽通证)</div>
             <div style="display:flex; align-items:center; justify-content:space-between;">
                 <span style="font-size:12px; color:rgba(255,255,255,0.7); font-family:monospace;">0x3f43...4444</span>
                 <button onclick="copyAddr('0x3f431ffcda5ce875a45d462272a07ab1886d4444')" style="background:rgba(59,130,246,0.2); border:none; color:#3b82f6; padding:6px 14px; border-radius:8px; font-size:12px; cursor:pointer; font-weight:600;">复制</button>
             </div>
         </div>
         <div style="padding:10px 0;">
-            <div style="font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:6px;">QLB (算力币)</div>
+            <div style="font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:6px;">QL (算力工具通证)</div>
             <div style="display:flex; align-items:center; justify-content:space-between;">
                 <span style="font-size:12px; color:rgba(255,255,255,0.7); font-family:monospace;">0xea49...4444</span>
                 <button onclick="copyAddr('0xea491e0077236b8b22d03cbd4372f28207b54444')" style="background:rgba(249,115,22,0.2); border:none; color:#f97316; padding:6px 14px; border-radius:8px; font-size:12px; cursor:pointer; font-weight:600;">复制</button>
@@ -193,23 +233,46 @@ body::before { content:''; position:fixed; top:0;left:0;right:0;bottom:0; backgr
 </div>
 
 <nav class="bottom-nav">
-    <a href="index.html" class="nav-item active"><span class="icon">🏠</span><span>首页</span></a>
-    <a href="node.html" class="nav-item"><span class="icon">⚡</span><span>节点</span></a>
-    <a href="https://ysai.lzxjsm.cn/h5/5.html#/pages/index/index" class="nav-item" target="_blank"><span class="icon">🤖</span><span>AI应用</span></a>
-    <a href="my.html" class="nav-item"><span class="icon">👤</span><span>我的</span></a>
+    <a href="index.html" class="nav-item active"><span class="icon">&#127968;</span><span>首页</span></a>
+    <a href="node.html" class="nav-item"><span class="icon">&#9889;</span><span>节点</span></a>
+    <a href="chart.html" class="nav-item"><span class="icon">&#128200;</span><span>行情</span></a>
+    <a href="https://ysai.lzxjsm.cn/h5/5.html#/pages/index/index" class="nav-item" target="_blank"><span class="icon">&#129302;</span><span>AI应用</span></a>
+    <a href="my.html" class="nav-item"><span class="icon">&#128100;</span><span>我的</span></a>
 </nav>
 
 <style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}</style>
 
 <script>
+// ===== 费率配置 (与智能合约一致) =====
+const FEE_RATES = {
+    usdtToHt: 0.01,    // 1%
+    htToUsdt: 0.03,    // 3%
+    htToYais: 0.05,    // 5%
+    yaisToHt: 0.05,    // 5%
+    yaisToQl: 0.02,    // 2%
+    nodePurchase: 0.02  // 2%
+};
+
+// ===== 汇率配置 (管理员可调参) =====
+const RATES = {
+    usdtToHt: 1.0,     // 1:1
+    yaisToHt: 0.1,     // 1 YAiS = 0.1 HT (变现退出)
+    yaisToQl: 10.0     // 1 YAiS = 10 QL (应用消耗)
+};
+
 let userData = {
     usdt: 5000,
-    htb: 1000,
+    ht: 1000,
     yais: 200,
-    qlb: 50,
+    ql: 50,
     nodes: 1000,
-    multiplier: 2.0
+    multiplier: 2.0,
+    totalInvested: 100000,
+    totalClaimed: 0
 };
+
+let walletConnected = false;
+let walletAddress = '';
 
 function initData() {
     const savedData = localStorage.getItem('yais_user_data');
@@ -223,15 +286,19 @@ function saveData() {
 }
 
 function updateUI() {
-    document.getElementById('htb-balance').innerText = userData.htb.toFixed(2);
+    document.getElementById('ht-balance').innerText = userData.ht.toFixed(2);
     document.getElementById('yais-balance').innerText = userData.yais.toFixed(2);
-    document.getElementById('qlb-balance').innerText = userData.qlb.toFixed(2);
+    document.getElementById('ql-balance').innerText = userData.ql.toFixed(2);
+    document.getElementById('usdt-balance').innerText = userData.usdt.toFixed(2);
     document.getElementById('yais-available').innerText = userData.yais.toFixed(2);
-    let total = userData.htb * 1 + userData.yais * 0.1 + userData.qlb * 0.01;
+    let total = userData.ht * 1 + userData.yais * RATES.yaisToHt + userData.ql * 0.01;
     document.getElementById('total-assets').innerText = total.toFixed(2);
     document.getElementById('node-count').innerText = userData.nodes;
-    let dailyRelease = userData.nodes * 0.01 * userData.multiplier;
+    let dailyRelease = userData.nodes * 0.005 * userData.multiplier;
     document.getElementById('daily-release').innerText = '+' + dailyRelease.toFixed(2) + ' YAiS';
+    document.getElementById('multiplier-text').innerText = userData.multiplier.toFixed(1) + 'x';
+    let progress = userData.totalInvested > 0 ? Math.min((userData.totalClaimed / (userData.totalInvested * 10)) * 100, 100) : 0;
+    document.getElementById('release-progress').style.width = progress + '%';
 }
 
 function switchTab(type) {
@@ -253,18 +320,99 @@ function switchTab(type) {
 function calcExchange(type) {
     if (type === 'in') {
         let val = parseFloat(document.getElementById('input-usdt').value) || 0;
-        document.getElementById('output-htb').value = val.toFixed(2);
+        let fee = val * FEE_RATES.usdtToHt;
+        let net = val - fee;
+        let htOut = net * RATES.usdtToHt;
+        document.getElementById('in-fee').innerText = fee.toFixed(2) + ' USDT';
+        document.getElementById('in-net').innerText = net.toFixed(2) + ' USDT';
+        document.getElementById('output-ht').value = htOut.toFixed(2);
     } else {
         let val = parseFloat(document.getElementById('input-yais').value) || 0;
         let outType = document.querySelector('input[name="out_type"]:checked').value;
-        let result = 0;
-        if (outType === 'htb') { result = val * 0.1; document.getElementById('result-unit').innerText = 'HTB'; }
-        else { result = val * 10; document.getElementById('result-unit').innerText = 'QLB'; }
+        let feeRate = outType === 'ht' ? FEE_RATES.yaisToHt : FEE_RATES.yaisToQl;
+        let rate = outType === 'ht' ? RATES.yaisToHt : RATES.yaisToQl;
+        let fee = val * feeRate;
+        let net = val - fee;
+        let result = net * rate;
+        document.getElementById('out-fee').innerText = fee.toFixed(2) + ' YAiS';
         document.getElementById('output-result').value = result.toFixed(2);
-        document.getElementById('opt-htb').style.borderColor = outType === 'htb' ? 'rgba(139,92,246,0.4)' : 'rgba(255,255,255,0.08)';
-        document.getElementById('opt-htb').style.background = outType === 'htb' ? 'rgba(139,92,246,0.1)' : 'rgba(255,255,255,0.03)';
-        document.getElementById('opt-qlb').style.borderColor = outType === 'qlb' ? 'rgba(249,115,22,0.4)' : 'rgba(255,255,255,0.08)';
-        document.getElementById('opt-qlb').style.background = outType === 'qlb' ? 'rgba(249,115,22,0.1)' : 'rgba(255,255,255,0.03)';
+        document.getElementById('result-unit').innerText = outType === 'ht' ? 'HT' : 'QL';
+        document.getElementById('opt-ht').style.borderColor = outType === 'ht' ? 'rgba(139,92,246,0.4)' : 'rgba(255,255,255,0.08)';
+        document.getElementById('opt-ht').style.background = outType === 'ht' ? 'rgba(139,92,246,0.1)' : 'rgba(255,255,255,0.03)';
+        document.getElementById('opt-ql').style.borderColor = outType === 'ql' ? 'rgba(249,115,22,0.4)' : 'rgba(255,255,255,0.08)';
+        document.getElementById('opt-ql').style.background = outType === 'ql' ? 'rgba(249,115,22,0.1)' : 'rgba(255,255,255,0.03)';
+    }
+}
+
+function doExchange(type) {
+    if (!walletConnected) {
+        alert('请先连接BSC钱包');
+        return;
+    }
+    if (type === 'in') {
+        let val = parseFloat(document.getElementById('input-usdt').value) || 0;
+        if (val <= 0) { alert('请输入有效数量'); return; }
+        if (val > userData.usdt) { alert('USDT余额不足'); return; }
+        let fee = val * FEE_RATES.usdtToHt;
+        let htOut = (val - fee) * RATES.usdtToHt;
+        userData.usdt -= val;
+        userData.ht += htOut;
+        saveData(); updateUI();
+        alert('充值成功!\n支付: ' + val.toFixed(2) + ' USDT\n手续费: ' + fee.toFixed(2) + ' USDT\n获得: ' + htOut.toFixed(2) + ' HT');
+        document.getElementById('input-usdt').value = '';
+        calcExchange('in');
+    } else {
+        let val = parseFloat(document.getElementById('input-yais').value) || 0;
+        if (val <= 0) { alert('请输入有效数量'); return; }
+        if (val > userData.yais) { alert('YAiS余额不足'); return; }
+        let outType = document.querySelector('input[name="out_type"]:checked').value;
+        let feeRate = outType === 'ht' ? FEE_RATES.yaisToHt : FEE_RATES.yaisToQl;
+        let rate = outType === 'ht' ? RATES.yaisToHt : RATES.yaisToQl;
+        let fee = val * feeRate;
+        let result = (val - fee) * rate;
+        userData.yais -= val;
+        if (outType === 'ht') { userData.ht += result; }
+        else { userData.ql += result; }
+        saveData(); updateUI();
+        alert('兑换成功!\n支付: ' + val.toFixed(2) + ' YAiS\n手续费: ' + fee.toFixed(2) + ' YAiS\n获得: ' + result.toFixed(2) + ' ' + (outType === 'ht' ? 'HT' : 'QL'));
+        document.getElementById('input-yais').value = '';
+        calcExchange('out');
+    }
+}
+
+async function connectWallet() {
+    if (typeof window.ethereum !== 'undefined') {
+        try {
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            walletAddress = accounts[0];
+            walletConnected = true;
+            document.getElementById('wallet-text').innerText = walletAddress.slice(0,6) + '...' + walletAddress.slice(-4);
+            document.getElementById('wallet-icon').innerText = '&#10003;';
+            document.getElementById('wallet-btn').classList.add('connected');
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: '0x38' }]
+                });
+            } catch(switchError) {
+                if (switchError.code === 4902) {
+                    await window.ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [{
+                            chainId: '0x38',
+                            chainName: 'BSC Mainnet',
+                            nativeCurrency: { name: 'BNB', symbol: 'BNB', decimals: 18 },
+                            rpcUrls: ['https://bsc-dataseed.binance.org'],
+                            blockExplorerUrls: ['https://bscscan.com']
+                        }]
+                    });
+                }
+            }
+        } catch(err) {
+            alert('连接失败: ' + err.message);
+        }
+    } else {
+        alert('未检测到钱包插件，请安装MetaMask或其他BSC兼容钱包');
     }
 }
 
