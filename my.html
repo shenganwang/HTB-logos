@@ -9,6 +9,8 @@
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0e27; color: #e2e8f0; min-height: 100vh; padding-bottom: 80px; position: relative; overflow-x: hidden; }
 body::before { content:''; position:fixed; top:0;left:0;right:0;bottom:0; background: radial-gradient(ellipse at 20% 0%, rgba(59,130,246,0.12) 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, rgba(139,92,246,0.08) 0%, transparent 50%); pointer-events:none; z-index:0; }
 .page { position:relative; z-index:1; max-width:430px; margin:0 auto; padding:0 16px 80px; }
+.glass-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 20px; margin-bottom: 16px; position:relative; overflow:hidden; }
+.glass-card::before { content:''; position:absolute; top:0;left:0;right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent); }
 .asset-card { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:18px; padding:18px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; position:relative; overflow:hidden; }
 .asset-card::before { content:''; position:absolute; top:0;left:0;right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent); }
 .asset-info h3 { font-size:14px; margin:0 0 6px 0; color:rgba(255,255,255,0.5); }
@@ -26,96 +28,101 @@ body::before { content:''; position:fixed; top:0;left:0;right:0;bottom:0; backgr
 .nav-item { display:flex; flex-direction:column; align-items:center; text-decoration:none; color:rgba(255,255,255,0.35); font-size:11px; gap:4px; }
 .nav-item .icon { font-size:22px; }
 .nav-item.active { color:#3b82f6; }
+.wallet-info { display:flex; align-items:center; gap:8px; padding:12px 16px; background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.2); border-radius:14px; margin-bottom:16px; }
+.wallet-info .dot { width:8px; height:8px; background:#10b981; border-radius:50%; }
+.wallet-info .addr { font-size:13px; color:#10b981; font-family:monospace; }
 @media (min-width:431px) { .bottom-nav { border-radius:0; } }
 </style>
 </head>
 <body>
 <div class="page">
-    <!-- 顶部 -->
     <div style="padding:40px 0 20px;">
         <h1 style="font-size:24px; font-weight:800;">我的资产中心</h1>
     </div>
 
-    <!-- HTB -->
+    <div class="wallet-info" id="wallet-info" style="display:none;">
+        <span class="dot"></span>
+        <span class="addr" id="wallet-addr-display">未连接</span>
+    </div>
+
     <div class="asset-card">
         <div class="asset-info">
-            <h3>HTB (算力储备)</h3>
-            <div class="asset-balance" id="balance-htb" style="color:#f59e0b;">0.00</div>
+            <h3>HT 门户通证</h3>
+            <div class="asset-balance" id="balance-ht" style="color:#f59e0b;">0.00</div>
         </div>
         <div class="asset-actions">
-            <button onclick="alert('充值通道维护中')">充值</button>
-            <button class="primary" onclick="alert('请先绑定钱包')">提现</button>
+            <button onclick="window.location.href='index.html'">充值</button>
+            <button class="primary" onclick="window.location.href='index.html'">提现</button>
         </div>
     </div>
 
-    <!-- YAiS -->
     <div class="asset-card" style="border-color:rgba(59,130,246,0.2);">
         <div class="asset-info">
-            <h3 style="color:rgba(59,130,246,0.7);">YAiS (核心权益)</h3>
+            <h3 style="color:rgba(59,130,246,0.7);">YAiS 枢纽通证</h3>
             <div class="asset-balance" id="balance-yais" style="color:#3b82f6;">0.00</div>
         </div>
         <div class="asset-actions">
-            <button onclick="alert('兑换功能开发中')">兑HTB</button>
+            <button onclick="window.location.href='index.html'">兑HT</button>
             <button class="primary" onclick="window.location.href='node.html'">进应用</button>
         </div>
     </div>
 
-    <!-- QLB -->
     <div class="asset-card">
         <div class="asset-info">
-            <h3>QLB (消费积分)</h3>
-            <div class="asset-balance" id="balance-qlb" style="color:#f97316;">0.00</div>
+            <h3>QL 工具通证</h3>
+            <div class="asset-balance" id="balance-ql" style="color:#f97316;">0.00</div>
         </div>
         <div class="asset-actions">
-            <button onclick="alert('暂无可质押项')">质押</button>
-            <button class="primary" onclick="window.location.href='node.html'">去消费</button>
+            <button onclick="alert('质押功能开发中')">质押</button>
+            <button class="primary" onclick="window.location.href='https://ysai.lzxjsm.cn/h5/5.html#/pages/index/index'">去消耗</button>
         </div>
     </div>
 
-    <!-- 菜单列表 -->
     <div class="menu-list">
+        <div class="menu-item" onclick="window.location.href='chart.html'">
+            <span>&#128200; 内部行情</span>
+            <span style="color:rgba(255,255,255,0.2);">&#8250;</span>
+        </div>
         <div class="menu-item" onclick="alert('邀请好友功能即将上线')">
-            <span>🤝 邀请好友</span>
-            <span style="color:rgba(255,255,255,0.2);">›</span>
+            <span>&#129309; 邀请好友</span>
+            <span style="color:rgba(255,255,255,0.2);">&#8250;</span>
         </div>
         <div class="menu-item" onclick="window.location.href='node.html'">
-            <span>⚙️ 我的节点</span>
-            <span style="color:rgba(255,255,255,0.2);">›</span>
+            <span>&#9881;&#65039; 我的节点</span>
+            <span style="color:rgba(255,255,255,0.2);">&#8250;</span>
         </div>
-        <div class="menu-item" onclick="alert('设置功能开发中')">
-            <span>🔒 安全设置</span>
-            <span style="color:rgba(255,255,255,0.2);">›</span>
+        <div class="menu-item" onclick="alert('安全设置功能开发中')">
+            <span>&#128274; 安全设置</span>
+            <span style="color:rgba(255,255,255,0.2);">&#8250;</span>
+        </div>
+        <div class="menu-item" onclick="alert('合约地址:\n\nHT: 0xbb6f...4444\nYAiS: 0x3f43...4444\nQL: 0xea49...4444\n\nBSC链 BEP-20标准')">
+            <span>&#128196; 合约地址</span>
+            <span style="color:rgba(255,255,255,0.2);">&#8250;</span>
         </div>
     </div>
 </div>
 
-<!-- 底部导航 -->
 <nav class="bottom-nav">
-    <a href="index.html" class="nav-item"><span class="icon">🏠</span><span>首页</span></a>
-    <a href="node.html" class="nav-item"><span class="icon">⚡</span><span>节点</span></a>
-    <a href="https://ysai.lzxjsm.cn/h5/5.html#/pages/index/index" class="nav-item" target="_blank"><span class="icon">🤖</span><span>AI应用</span></a>
-    <a href="my.html" class="nav-item active"><span class="icon">👤</span><span>我的</span></a>
+    <a href="index.html" class="nav-item"><span class="icon">&#127968;</span><span>首页</span></a>
+    <a href="node.html" class="nav-item"><span class="icon">&#9889;</span><span>节点</span></a>
+    <a href="chart.html" class="nav-item"><span class="icon">&#128200;</span><span>行情</span></a>
+    <a href="https://ysai.lzxjsm.cn/h5/5.html#/pages/index/index" class="nav-item" target="_blank"><span class="icon">&#129302;</span><span>AI应用</span></a>
+    <a href="my.html" class="nav-item active"><span class="icon">&#128100;</span><span>我的</span></a>
 </nav>
 
 <script>
-// ===== 核心逻辑 - 保持原版 =====
-const userData = {
-    htb: localStorage.getItem('user_htb') || 12450,
-    yais: localStorage.getItem('user_yais') || 35.20,
-    qlb: localStorage.getItem('user_qlb') || 892
-};
-document.getElementById('balance-htb').innerText = parseFloat(userData.htb).toFixed(2);
-document.getElementById('balance-yais').innerText = parseFloat(userData.yais).toFixed(2);
-document.getElementById('balance-qlb').innerText = parseFloat(userData.qlb).toFixed(0);
-
-// 同步 localStorage 数据
 function syncFromMain() {
     const savedData = localStorage.getItem('yais_user_data');
     if (savedData) {
         const d = JSON.parse(savedData);
-        document.getElementById('balance-htb').innerText = d.htb.toFixed(2);
-        document.getElementById('balance-yais').innerText = d.yais.toFixed(2);
-        document.getElementById('balance-qlb').innerText = d.qlb.toFixed(0);
+        document.getElementById('balance-ht').innerText = (d.ht || 0).toFixed(2);
+        document.getElementById('balance-yais').innerText = (d.yais || 0).toFixed(2);
+        document.getElementById('balance-ql').innerText = (d.ql || 0).toFixed(2);
+    }
+    const walletAddr = localStorage.getItem('wallet_address');
+    if (walletAddr) {
+        document.getElementById('wallet-info').style.display = 'flex';
+        document.getElementById('wallet-addr-display').innerText = walletAddr.slice(0,8) + '...' + walletAddr.slice(-6);
     }
 }
 document.addEventListener('DOMContentLoaded', syncFromMain);
