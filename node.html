@@ -16,13 +16,9 @@ body::before { content:''; position:fixed; top:0;left:0;right:0;bottom:0; backgr
 .btn.primary:active { transform:scale(0.98); }
 .btn.gold { background:linear-gradient(135deg,#f59e0b,#f97316); color:#000; box-shadow:0 4px 16px rgba(245,158,11,0.3); }
 .btn.gold:active { transform:scale(0.98); }
+.btn.green { background:linear-gradient(135deg,#10b981,#059669); color:#fff; box-shadow:0 4px 16px rgba(16,185,129,0.3); }
+.btn.green:active { transform:scale(0.98); }
 .section-title { font-size:18px; font-weight:700; margin-bottom:16px; border-left:4px solid #3b82f6; padding-left:12px; }
-.text-blue { color:#3b82f6; }
-.text-green { color:#10b981; }
-.text-purple { color:#8b5cf6; }
-.text-yellow { color:#f59e0b; }
-.text-orange { color:#f97316; }
-.text-gray { color:rgba(255,255,255,0.5); }
 .bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:430px; background:rgba(10,14,39,0.95); backdrop-filter:blur(20px); border-top:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-around; padding:8px 0 24px; z-index:100; }
 .nav-item { display:flex; flex-direction:column; align-items:center; text-decoration:none; color:rgba(255,255,255,0.35); font-size:11px; gap:4px; }
 .nav-item .icon { font-size:22px; }
@@ -38,150 +34,189 @@ body::before { content:''; position:fixed; top:0;left:0;right:0;bottom:0; backgr
 .node-card .node-right { text-align:right; }
 .node-card .node-right .profit { font-size:18px; font-weight:700; color:#10b981; }
 .node-card .node-right .state { font-size:12px; color:#10b981; margin-top:4px; }
+.fee-row { display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(245,158,11,0.06); border-radius:10px; margin:8px 0; font-size:12px; }
+.fee-row .fee-label { color:rgba(255,255,255,0.5); }
+.fee-row .fee-value { color:#f59e0b; font-weight:600; }
+.tier-badge { display:inline-block; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:600; }
+.tier-bronze { background:rgba(180,83,9,0.2); color:#d97706; }
+.tier-gold { background:rgba(245,158,11,0.15); color:#f59e0b; }
+.tier-diamond { background:rgba(59,130,246,0.15); color:#3b82f6; }
+.claim-btn { display:flex; align-items:center; justify-content:center; gap:8px; }
 @media (min-width:431px) { .bottom-nav { border-radius:0; } }
 </style>
 </head>
 <body>
 <div class="page">
     <div style="display:flex; justify-content:space-between; align-items:center; padding:40px 0 16px;">
-        <h1 style="font-size:24px; font-weight:800;">⚡ AI 算力网络</h1>
+        <h1 style="font-size:24px; font-weight:800;">节点释放引擎</h1>
         <span style="background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); border-radius:20px; padding:4px 12px; font-size:12px; color:#10b981; display:flex; align-items:center; gap:6px;">
-            <span style="width:6px; height:6px; background:#10b981; border-radius:50%; animation:pulse 2s infinite;"></span> 主网运行中
+            <span style="width:6px; height:6px; background:#10b981; border-radius:50%; animation:pulse 2s infinite;"></span> BSC主网运行中
         </span>
     </div>
 
     <div class="glass-card" style="text-align:center; position:relative;">
         <div style="position:absolute; top:-40px; left:50%; transform:translateX(-50%); width:200px; height:200px; background:radial-gradient(circle, rgba(59,130,246,0.12), transparent 70%); pointer-events:none;"></div>
-        <p style="font-size:14px; color:rgba(255,255,255,0.5); margin-bottom:8px;">我的总算力 (HTB)</p>
-        <div style="font-size:40px; font-weight:800;" id="totalHash">12,450.00</div>
-        <p style="font-size:13px; color:rgba(255,255,255,0.35); margin-top:8px;">预计日产出: 35.2 HTB</p>
+        <p style="font-size:14px; color:rgba(255,255,255,0.5); margin-bottom:8px;">我的总算力 (HT)</p>
+        <div style="font-size:40px; font-weight:800;" id="totalHash">0.00</div>
+        <p style="font-size:13px; color:rgba(255,255,255,0.35); margin-top:8px;">已投资: <span id="total-invested">0</span> HT | 已释放: <span id="total-claimed">0</span> YAiS</p>
     </div>
 
     <div style="display:flex; gap:12px; margin-bottom:16px;">
         <div class="glass-card" style="flex:1; text-align:center; padding:16px 12px; margin-bottom:0;">
-            <p style="font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:6px;">在线节点</p>
-            <div style="font-size:28px; font-weight:800; color:#3b82f6;">3 <span style="font-size:14px; color:rgba(255,255,255,0.4);">个</span></div>
+            <p style="font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:6px;">当前节点数</p>
+            <div style="font-size:28px; font-weight:800; color:#3b82f6;"><span id="current-nodes">0</span> <span style="font-size:14px; color:rgba(255,255,255,0.4);">个</span></div>
         </div>
         <div class="glass-card" style="flex:1; text-align:center; padding:16px 12px; margin-bottom:0;">
-            <p style="font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:6px;">累计贡献</p>
-            <div style="font-size:28px; font-weight:800; color:#8b5cf6;">892 <span style="font-size:14px; color:rgba(255,255,255,0.4);">小时</span></div>
+            <p style="font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:6px;">当前倍率</p>
+            <div style="font-size:28px; font-weight:800; color:#8b5cf6;"><span id="current-multiplier">1.0</span><span style="font-size:14px; color:rgba(255,255,255,0.4);">x</span></div>
         </div>
     </div>
 
-    <div class="section-title">运行中的节点</div>
+    <div class="glass-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h3 style="font-weight:700; font-size:15px;">待领取 YAiS</h3>
+            <span class="tier-badge" id="tier-badge">基础档</span>
+        </div>
+        <div style="text-align:center; margin:12px 0;">
+            <h1 id="pending-release" style="color:#10b981; font-size:36px; font-weight:800;">0.00 YAiS</h1>
+        </div>
+        <button class="btn green claim-btn" onclick="claimRelease()">
+            <span>领取释放</span>
+        </button>
+    </div>
+
+    <div class="section-title">节点档位</div>
     <div class="node-card">
         <div class="node-left">
-            <h4>超级验证节点 A-01</h4>
-            <p>类型: 基础层 | 质押: 5000 HTB</p>
+            <h4>青铜档 <span class="tier-badge tier-bronze">1.6x</span></h4>
+            <p>100 - 999 节点 | 日释放 0.5%</p>
         </div>
         <div class="node-right">
-            <div class="profit">+12.5 /h</div>
-            <div class="state">● 运行正常</div>
+            <div class="profit">+0.8%</div>
+            <div class="state">日产出</div>
         </div>
     </div>
     <div class="node-card">
         <div class="node-left">
-            <h4>边缘计算节点 B-03</h4>
-            <p>类型: 应用层 | 质押: 2000 HTB</p>
+            <h4>黄金档 <span class="tier-badge tier-gold">2.0x</span></h4>
+            <p>1000 - 2999 节点 | 日释放 0.5%</p>
         </div>
         <div class="node-right">
-            <div class="profit">+8.2 /h</div>
-            <div class="state">● 运行正常</div>
+            <div class="profit">+1.0%</div>
+            <div class="state">日产出</div>
         </div>
     </div>
-    <div class="node-card" style="border-left:3px solid #f59e0b;">
+    <div class="node-card" style="border-left:3px solid #3b82f6;">
         <div class="node-left">
-            <h4>AI 推理节点 C-07</h4>
-            <p>类型: 高级层 | 质押: 5450 HTB</p>
+            <h4>钻石档 <span class="tier-badge tier-diamond">3.0x</span></h4>
+            <p>3000+ 节点 | 日释放 0.5%</p>
         </div>
         <div class="node-right">
-            <div class="profit" style="color:#f59e0b;">+14.5 /h</div>
-            <div class="state" style="color:#f59e0b;">● 算力满载</div>
+            <div class="profit" style="color:#3b82f6;">+1.5%</div>
+            <div class="state" style="color:#3b82f6;">日产出</div>
         </div>
     </div>
 
     <div class="glass-card" style="text-align:center; margin-top:20px;">
-        <p style="font-size:14px; color:rgba(255,255,255,0.4); margin-bottom:8px;">当前可用余额 (HTB)</p>
-        <h1 id="user-balance" style="color:#10b981; font-size:36px; font-weight:800; margin:8px 0; cursor:pointer;" onclick="addTestMoney()">0.00</h1>
-        <p style="font-size:11px; color:rgba(255,255,255,0.25);">(点击余额可测试充值 +100 HTB)</p>
-    </div>
-
-    <div class="glass-card" style="text-align:center;">
-        <p style="font-size:14px; color:rgba(255,255,255,0.4); margin-bottom:8px;">当前持有节点数</p>
-        <h1 id="current-nodes" style="color:#3b82f6; font-size:36px; font-weight:800; margin:8px 0;">0</h1>
-        <p style="font-size:12px; color:rgba(255,255,255,0.3);">每个节点每日产出 0.01 YAiS</p>
+        <p style="font-size:14px; color:rgba(255,255,255,0.4); margin-bottom:8px;">当前可用余额 (HT)</p>
+        <h1 id="user-balance" style="color:#f59e0b; font-size:36px; font-weight:800; margin:8px 0; cursor:pointer;" onclick="addTestMoney()">0.00</h1>
+        <p style="font-size:11px; color:rgba(255,255,255,0.25);">(点击余额可测试充值 +100 HT)</p>
     </div>
 
     <div class="glass-card" style="margin-top:20px;">
-        <h3 style="color:#f59e0b; font-size:17px; font-weight:700; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.06);">🚀 部署新节点 (模拟器)</h3>
+        <h3 style="color:#f59e0b; font-size:17px; font-weight:700; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,0.06);">部署新节点</h3>
         <div style="margin-bottom:18px;">
-            <label style="display:block; font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:8px;">投入 HTB 数量 (1 HTB = 1 节点)</label>
+            <label style="display:block; font-size:12px; color:rgba(255,255,255,0.4); margin-bottom:8px;">投入 HT 数量 (100 HT = 1 节点)</label>
             <input type="number" id="nodeInput" placeholder="请输入数量，例如：1000" oninput="calculateYAiS()" style="width:100%; padding:15px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:12px; font-size:16px; outline:none; font-family:monospace;">
         </div>
         <div style="background:rgba(245,158,11,0.08); padding:15px; border-radius:12px; border-left:4px solid #f59e0b;">
             <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px;">
+                <span style="color:rgba(255,255,255,0.5);">购买节点数：</span>
+                <span id="nodeCountDisplay" style="color:#fff; font-weight:700;">0 个</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px;">
                 <span style="color:rgba(255,255,255,0.5);">当前档位倍率：</span>
-                <span id="rateDisplay" style="color:#10b981; font-weight:700;">1.0 倍 (未达标)</span>
+                <span id="rateDisplay" style="color:#10b981; font-weight:700;">1.0x (未达标)</span>
             </div>
             <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px;">
                 <span style="color:rgba(255,255,255,0.5);">预计每日释放 YAiS：</span>
                 <span id="dailyYAiS" style="color:#f59e0b; font-weight:700; font-size:18px;">0.00</span>
+            </div>
+            <div class="fee-row">
+                <span class="fee-label">购买手续费 (2%)：</span>
+                <span class="fee-value" id="purchaseFee">0.00 HT</span>
             </div>
             <div style="display:flex; justify-content:space-between; font-size:14px;">
                 <span style="color:rgba(255,255,255,0.5);">预计回本周期：</span>
                 <span id="roiDays" style="color:#f59e0b; font-weight:700;">-- 天</span>
             </div>
         </div>
-        <button class="btn gold" style="margin-top:20px; padding:15px; width:100%;" onclick="handleBuyNode()">立即部署节点</button>
-    </div>
-
-    <div style="text-align:center; margin-top:16px;">
-        <p style="color:rgba(255,255,255,0.3); font-size:12px; margin-bottom:10px;">单价: 100 HTB / 个</p>
-        <button id="buy-node-btn" class="btn primary" style="background:linear-gradient(135deg,#8b5cf6,#a855f7); box-shadow:0 4px 16px rgba(139,92,246,0.3);">立即购买节点 (100 HTB)</button>
+        <button class="btn gold" style="margin-top:20px;" onclick="handleBuyNode()">立即部署节点</button>
     </div>
 </div>
 
 <nav class="bottom-nav">
-    <a href="index.html" class="nav-item"><span class="icon">🏠</span><span>首页</span></a>
-    <a href="node.html" class="nav-item active"><span class="icon">⚡</span><span>节点</span></a>
-    <a href="https://ysai.lzxjsm.cn/h5/5.html#/pages/index/index" class="nav-item" target="_blank"><span class="icon">🤖</span><span>AI应用</span></a>
-    <a href="my.html" class="nav-item"><span class="icon">👤</span><span>我的</span></a>
+    <a href="index.html" class="nav-item"><span class="icon">&#127968;</span><span>首页</span></a>
+    <a href="node.html" class="nav-item active"><span class="icon">&#9889;</span><span>节点</span></a>
+    <a href="chart.html" class="nav-item"><span class="icon">&#128200;</span><span>行情</span></a>
+    <a href="https://ysai.lzxjsm.cn/h5/5.html#/pages/index/index" class="nav-item" target="_blank"><span class="icon">&#129302;</span><span>AI应用</span></a>
+    <a href="my.html" class="nav-item"><span class="icon">&#128100;</span><span>我的</span></a>
 </nav>
 
 <script>
 const NODE_PRICE = 100;
-let userData = { htb: 1000, yais: 200, qlb: 50, nodes: 1000, multiplier: 2.0 };
+const DAILY_BASE_RATE = 0.005;
+const NODE_FEE_RATE = 0.02;
+
+let userData = { usdt: 5000, ht: 1000, yais: 200, ql: 50, nodes: 1000, multiplier: 2.0, totalInvested: 100000, totalClaimed: 0 };
+let walletConnected = false;
 
 function initData() {
-    if (!localStorage.getItem('htb_balance')) localStorage.setItem('htb_balance', '0.00');
-    if (!localStorage.getItem('htb_nodes')) localStorage.setItem('htb_nodes', '0');
     const savedData = localStorage.getItem('yais_user_data');
-    if (savedData) {
-        userData = JSON.parse(savedData);
-        localStorage.setItem('htb_balance', userData.htb.toFixed(2));
-        localStorage.setItem('htb_nodes', userData.nodes.toString());
-    }
+    if (savedData) { userData = JSON.parse(savedData); }
+    if (localStorage.getItem('wallet_connected') === 'true') { walletConnected = true; }
 }
 
-function saveData() {
-    localStorage.setItem('yais_user_data', JSON.stringify(userData));
-    localStorage.setItem('htb_balance', userData.htb.toFixed(2));
-    localStorage.setItem('htb_nodes', userData.nodes.toString());
-}
+function saveData() { localStorage.setItem('yais_user_data', JSON.stringify(userData)); }
 
 function updateUI() {
     const balEl = document.getElementById('user-balance');
     const nodeEl = document.getElementById('current-nodes');
-    if (balEl) balEl.innerText = parseFloat(localStorage.getItem('htb_balance') || 0).toFixed(2);
-    if (nodeEl) nodeEl.innerText = localStorage.getItem('htb_nodes') || '0';
+    const multEl = document.getElementById('current-multiplier');
+    const totalHashEl = document.getElementById('totalHash');
+    const investedEl = document.getElementById('total-invested');
+    const claimedEl = document.getElementById('total-claimed');
+    const pendingEl = document.getElementById('pending-release');
+    const tierBadge = document.getElementById('tier-badge');
+    if (balEl) balEl.innerText = userData.ht.toFixed(2);
+    if (nodeEl) nodeEl.innerText = userData.nodes;
+    if (multEl) multEl.innerText = userData.multiplier.toFixed(1);
+    if (totalHashEl) totalHashEl.innerText = (userData.nodes * 100).toLocaleString() + '.00';
+    if (investedEl) investedEl.innerText = (userData.totalInvested || 0).toLocaleString();
+    if (claimedEl) claimedEl.innerText = (userData.totalClaimed || 0).toFixed(2);
+    let multiplier = getMultiplier(userData.nodes);
+    let dailyRelease = userData.nodes * DAILY_BASE_RATE * multiplier;
+    let pending = dailyRelease;
+    if (pendingEl) pendingEl.innerText = '+' + pending.toFixed(2) + ' YAiS';
+    if (tierBadge) {
+        if (userData.nodes >= 3000) { tierBadge.textContent = '钻石档 3.0x'; tierBadge.className = 'tier-badge tier-diamond'; }
+        else if (userData.nodes >= 1000) { tierBadge.textContent = '黄金档 2.0x'; tierBadge.className = 'tier-badge tier-gold'; }
+        else if (userData.nodes >= 100) { tierBadge.textContent = '青铜档 1.6x'; tierBadge.className = 'tier-badge tier-bronze'; }
+        else { tierBadge.textContent = '基础档 1.0x'; tierBadge.className = 'tier-badge'; }
+    }
+}
+
+function getMultiplier(nodes) {
+    if (nodes >= 3000) return 3.0;
+    if (nodes >= 1000) return 2.0;
+    if (nodes >= 100) return 1.6;
+    return 1.0;
 }
 
 function addTestMoney() {
-    let balance = parseFloat(localStorage.getItem('htb_balance') || 0);
-    let newBalance = balance + 100;
-    animateBalanceChange(balance, newBalance);
-    localStorage.setItem('htb_balance', newBalance.toFixed(2));
-    userData.htb = newBalance;
+    let newBalance = userData.ht + 100;
+    animateBalanceChange(userData.ht, newBalance);
+    userData.ht = newBalance;
     saveData();
     setTimeout(updateUI, 600);
 }
@@ -203,30 +238,44 @@ function animateBalanceChange(start, end) {
 }
 
 function handleBuyNode() {
-    let balance = parseFloat(localStorage.getItem('htb_balance') || 0);
-    let nodes = parseInt(localStorage.getItem('htb_nodes') || 0);
-    if (navigator.vibrate) navigator.vibrate(50);
-    if (balance >= NODE_PRICE) {
-        animateBalanceChange(balance, balance - NODE_PRICE);
-        localStorage.setItem('htb_balance', (balance - NODE_PRICE).toFixed(2));
-        localStorage.setItem('htb_nodes', nodes + 1);
-        userData.htb = balance - NODE_PRICE;
-        userData.nodes = nodes + 1;
-        saveData();
-        setTimeout(function() {
-            updateUI();
-            showModal('购买成功！', '恭喜您成功部署了一个新节点。\n每日产出将自动增加。', true);
-        }, 600);
-    } else {
-        showModal('余额不足', '当前余额: ' + balance.toFixed(2) + ' HTB\n节点价格: ' + NODE_PRICE + ' HTB\n\n请点击余额数字充值后再试。', false);
-    }
+    let inputVal = parseFloat(document.getElementById('nodeInput').value);
+    if (!inputVal || inputVal < NODE_PRICE) { showModal('输入不足', '最少需要 ' + NODE_PRICE + ' HT 购买1个节点', false); return; }
+    if (!walletConnected) { showModal('未连接钱包', '请先在首页连接BSC钱包', false); return; }
+    if (inputVal > userData.ht) { showModal('余额不足', '当前余额: ' + userData.ht.toFixed(2) + ' HT\n需要: ' + inputVal.toFixed(2) + ' HT\n\n请先充值后再试。', false); return; }
+    let fee = inputVal * NODE_FEE_RATE;
+    let netToNodes = inputVal - fee;
+    let nodesBought = Math.floor(netToNodes / NODE_PRICE);
+    let actualCost = nodesBought * NODE_PRICE;
+    let actualFee = actualCost * NODE_FEE_RATE;
+    let totalDeduct = actualCost + actualFee;
+    animateBalanceChange(userData.ht, userData.ht - totalDeduct);
+    userData.ht -= totalDeduct;
+    userData.nodes += nodesBought;
+    userData.totalInvested = (userData.totalInvested || 0) + actualCost;
+    userData.multiplier = getMultiplier(userData.nodes);
+    saveData();
+    setTimeout(function() {
+        updateUI();
+        showModal('部署成功!', '成功部署 ' + nodesBought + ' 个节点\n扣除: ' + totalDeduct.toFixed(2) + ' HT\n其中手续费: ' + actualFee.toFixed(2) + ' HT\n\n每日释放将自动增加。', true);
+    }, 600);
+}
+
+function claimRelease() {
+    if (!walletConnected) { showModal('未连接钱包', '请先在首页连接BSC钱包', false); return; }
+    let multiplier = getMultiplier(userData.nodes);
+    let dailyRelease = userData.nodes * DAILY_BASE_RATE * multiplier;
+    if (dailyRelease <= 0) { showModal('无可领取', '当前没有待领取的YAiS', false); return; }
+    userData.yais += dailyRelease;
+    userData.totalClaimed = (userData.totalClaimed || 0) + dailyRelease;
+    saveData(); updateUI();
+    showModal('领取成功!', '已领取 ' + dailyRelease.toFixed(2) + ' YAiS\n\n可前往首页兑换为HT变现退出，或兑换为QL用于AI应用消耗。', true);
 }
 
 function showModal(title, msg, isSuccess) {
     const oldModal = document.getElementById('custom-modal');
     if (oldModal) oldModal.remove();
     const modalHtml = '<div id="custom-modal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:999;display:flex;align-items:center;justify-content:center;">' +
-        '<div class="modal-content" style="background:#1a1f3a;width:80%;max-width:300px;border-radius:16px;padding:25px;text-align:center;border:1px solid rgba(255,255,255,0.1);box-shadow:0 10px 25px rgba(0,0,0,0.5);">' +
+        '<div class="modal-content" style="background:#1a1f3a;width:80%;max-width:320px;border-radius:16px;padding:25px;text-align:center;border:1px solid rgba(255,255,255,0.1);box-shadow:0 10px 25px rgba(0,0,0,0.5);">' +
         '<h3 style="margin:0 0 10px;font-size:20px;color:#fff;">' + title + '</h3>' +
         '<p style="color:rgba(255,255,255,0.6);line-height:1.6;white-space:pre-line;margin-bottom:20px;">' + msg + '</p>' +
         '<button onclick="document.getElementById(\'custom-modal\').remove()" style="background:' + (isSuccess ? '#10b981' : '#ef4444') + ';color:#fff;border:none;padding:10px 30px;border-radius:12px;font-size:16px;cursor:pointer;width:100%;font-weight:600;">确认</button>' +
@@ -236,35 +285,41 @@ function showModal(title, msg, isSuccess) {
 
 function calculateYAiS() {
     let count = parseFloat(document.getElementById('nodeInput').value);
+    let nodeCountEl = document.getElementById('nodeCountDisplay');
+    let rateEl = document.getElementById('rateDisplay');
+    let dailyEl = document.getElementById('dailyYAiS');
+    let roiEl = document.getElementById('roiDays');
+    let feeEl = document.getElementById('purchaseFee');
     if (!count || count <= 0) {
-        document.getElementById('rateDisplay').innerText = '1.0 倍 (未达标)';
-        document.getElementById('dailyYAiS').innerText = '0.00';
-        document.getElementById('roiDays').innerText = '-- 天';
+        if (nodeCountEl) nodeCountEl.innerText = '0 个';
+        if (rateEl) rateEl.innerText = '1.0x (未达标)';
+        if (dailyEl) dailyEl.innerText = '0.00';
+        if (roiEl) roiEl.innerText = '-- 天';
+        if (feeEl) feeEl.innerText = '0.00 HT';
         return;
     }
-    let multiplier = 1.0;
-    let tierText = '1.0 倍 (基础档)';
-    if (count >= 100 && count < 1000) { multiplier = 1.6; tierText = '1.6 倍 (青铜档)'; }
-    else if (count >= 1000 && count < 3000) { multiplier = 2.0; tierText = '2.0 倍 (黄金档)'; }
-    else if (count >= 3000) { multiplier = 3.0; tierText = '3.0 倍 (钻石档)'; }
-    let dailyOutput = count * 0.005 * multiplier;
+    let fee = count * NODE_FEE_RATE;
+    let netForNodes = count - fee;
+    let nodes = Math.floor(netForNodes / NODE_PRICE);
+    let actualCost = nodes * NODE_PRICE;
+    let actualFee = actualCost * NODE_FEE_RATE;
+    let multiplier = getMultiplier(nodes);
+    let tierText = multiplier.toFixed(1) + 'x';
+    if (multiplier === 1.6) tierText += ' (青铜档)';
+    else if (multiplier === 2.0) tierText += ' (黄金档)';
+    else if (multiplier === 3.0) tierText += ' (钻石档)';
+    else tierText += ' (基础档)';
+    let dailyOutput = nodes * DAILY_BASE_RATE * multiplier;
     let dailyValue = dailyOutput * 0.1;
-    let daysToRecover = count / dailyValue;
-    document.getElementById('rateDisplay').innerText = tierText;
-    document.getElementById('dailyYAiS').innerText = dailyOutput.toFixed(2);
-    document.getElementById('roiDays').innerText = dailyValue > 0 ? Math.ceil(daysToRecover) + ' 天' : '-- 天';
+    let daysToRecover = dailyValue > 0 ? actualCost / dailyValue : 0;
+    if (nodeCountEl) nodeCountEl.innerText = nodes + ' 个';
+    if (rateEl) rateEl.innerText = tierText;
+    if (dailyEl) dailyEl.innerText = dailyOutput.toFixed(2);
+    if (roiEl) roiEl.innerText = daysToRecover > 0 ? Math.ceil(daysToRecover) + ' 天' : '-- 天';
+    if (feeEl) feeEl.innerText = actualFee.toFixed(2) + ' HT';
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    initData();
-    updateUI();
-    const buyBtn = document.getElementById('buy-node-btn');
-    if (buyBtn) {
-        buyBtn.addEventListener('touchstart', function() { this.classList.add('btn-buy-active'); });
-        buyBtn.addEventListener('touchend', function() { this.classList.remove('btn-buy-active'); handleBuyNode(); });
-        buyBtn.addEventListener('click', handleBuyNode);
-    }
-});
+document.addEventListener('DOMContentLoaded', function() { initData(); updateUI(); });
 </script>
 </body>
 </html>
